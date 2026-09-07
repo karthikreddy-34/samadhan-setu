@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useEffect, useRef 
 import {
   MessageSquarePlus, Layers, GraduationCap, LayoutDashboard, Workflow,
   Mic, Camera, MapPin, Users, CheckCircle2, ArrowRight, Sparkles,
-  Building2, X, Radio, Wand2, FileSearch, User, LogOut, Lock, ShieldCheck, Bell,
+  Building2, X, Wand2, FileSearch, User, LogOut, Lock, ShieldCheck, Bell,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -406,10 +406,10 @@ function DirectionsLink({ geo, label }) {
 const STAGES = ["Logged", "Assigned to University", "Prototype in Development", "Industry Partnership", "Piloting", "Deployed"];
 
 const ROLE_META = {
-  Citizen: { label: "Citizen", demoName: "Meera Devi", demoSub: "Resident, Chatra district", icon: User, desc: "Report a problem and see how many others share it.", tabs: ["submit", "clusters", "use-case-demo"], password: "citizen123", scopeNote: "Sees full detail only on cases they personally filed; other cases appear as redacted public summaries." },
-  Faculty: { label: "University Faculty", demoName: "Dr. R. Oraon", demoSub: "BIT Mesra", icon: GraduationCap, desc: "Review clustered cases and take on ones matching your research.", tabs: ["clusters", "match", "lifecycle", "use-case-demo"], password: "faculty123", scopeNote: "Sees the open, unassigned pool plus only their own assigned cases — not other institutions' active work." },
-  Industry: { label: "Industry Partner", demoName: "Anil Verma", demoSub: "Sal Valley Ventures", icon: Building2, desc: "Review routed citizen cases and support solutions moving toward deployment.", tabs: ["clusters", "lifecycle", "use-case-demo"], password: "industry123", scopeNote: "Sees citizen cases explicitly routed to industry, including newly recorded cases before a pilot begins." },
-  Government: { label: "Government Official", demoName: "S. Kumari", demoSub: "Dept. of Higher & Technical Education", icon: LayoutDashboard, desc: "Full oversight — submissions, routing, funding and analytics.", tabs: ["submit", "clusters", "match", "dashboard", "lifecycle", "use-case-demo"], password: "govt2026", scopeNote: "Unrestricted access — the only role that can see every case, every stage, statewide." },
+  Citizen: { label: "Citizen", demoName: "Meera Devi", demoSub: "Resident, Chatra district", icon: User, desc: "Report a problem and see how many others share it.", tabs: ["submit", "clusters"], password: "citizen123", scopeNote: "Sees full detail only on cases they personally filed; other cases appear as redacted public summaries." },
+  Faculty: { label: "University Faculty", demoName: "Dr. R. Oraon", demoSub: "BIT Mesra", icon: GraduationCap, desc: "Review clustered cases and take on ones matching your research.", tabs: ["clusters", "match", "lifecycle"], password: "faculty123", scopeNote: "Sees the open, unassigned pool plus only their own assigned cases — not other institutions' active work." },
+  Industry: { label: "Industry Partner", demoName: "Anil Verma", demoSub: "Sal Valley Ventures", icon: Building2, desc: "Review routed citizen cases and support solutions moving toward deployment.", tabs: ["clusters", "lifecycle"], password: "industry123", scopeNote: "Sees citizen cases explicitly routed to industry, including newly recorded cases before a pilot begins." },
+  Government: { label: "Government Official", demoName: "S. Kumari", demoSub: "Dept. of Higher & Technical Education", icon: LayoutDashboard, desc: "Full oversight — submissions, routing, funding and analytics.", tabs: ["submit", "clusters", "match", "dashboard", "lifecycle"], password: "govt2026", scopeNote: "Unrestricted access — the only role that can see every case, every stage, statewide." },
 };
 
 /* Row-level access scoping — mirrors an IAM policy per role, applied before data ever reaches a screen. */
@@ -1819,249 +1819,6 @@ function FundsPanel({ problem: p, user, onLogExpense }) {
 
 /* ---------------------------------- app ---------------------------------- */
 
-/* ---------------------------------- Generic Use Case Simulator judge demo ---------------------------------- */
-const USE_CASES = [
-  {
-    id: "elephant", icon: "🐘", title: "Human–Elephant Conflict", category: "Agriculture", district: "West Singhbhum",
-    caseId: "JH-AGR-ELE-1060", reportTitle: "Elephants entering paddy fields at night",
-    report: "Elephants are entering our village between 9 PM and 2 AM. They come from the nearby forest corridor and damage paddy fields. Families need an early warning before the herd reaches the farms.",
-    metrics: ["39", "21–02", "87/100"], metricLabels: ["citizen reports", "peak hours", "risk score"],
-    mapTitle: "FOREST CORRIDOR", mapLabels: ["Kumardih", "Bansjor", "Kendua"],
-    research: ["GIS hotspot map", "Movement prediction", "Risk zoning", "Corridor analysis"],
-    industry: ["IoT sensor nodes", "GPS geofence", "SMS / app alerts", "₹2.5L demo pledge"],
-    government: ["Forest Dept. verification", "3-village pilot", "Panchayat coordination", "Impact monitoring"],
-    citizenBody: "Residents contribute the missing ground truth: where incidents occur, when they happen, affected villages, crops and evidence.",
-    universityBody: "The platform converts reports into research tasks such as hotspot mapping, corridor analysis, time-pattern prediction and risk zoning.",
-    industryBody: "Industry turns validated research into a deployable early-warning solution using sensors, communication links and alerts.",
-    governmentBody: "Government verifies the challenge, coordinates the responsible department, approves a pilot and monitors measurable outcomes.",
-    impact: ["18", "3", "78%"], impactTargets: ["18", "3", "78%"],
-  },
-  {
-    id: "crop", icon: "🌾", title: "Crop Disease", category: "Agriculture", district: "Warangal",
-    caseId: "TS-AGR-CRO-2041", reportTitle: "Spreading leaf disease in cotton fields",
-    report: "Farmers are seeing unusual leaf spots spreading across cotton fields. They need quick identification, treatment guidance and a way to alert nearby farmers before the disease spreads.",
-    metrics: ["27", "6 days", "81/100"], metricLabels: ["farmer reports", "spread period", "risk score"],
-    mapTitle: "AFFECTED FARM BELTS", mapLabels: ["Field A", "Field B", "Field C"],
-    research: ["Image classification", "Disease mapping", "Spread prediction", "Treatment validation"],
-    industry: ["Mobile diagnosis", "Drone scouting", "Advisory alerts", "Farmer dashboard"],
-    government: ["Agri officer verification", "Village pilot", "Input coordination", "Outcome monitoring"],
-    citizenBody: "Farmers submit symptoms, photos, crop type and location so the platform can identify clusters and prioritize investigation.",
-    universityBody: "Researchers validate disease patterns, build image-based classification and estimate how quickly the problem may spread.",
-    industryBody: "Industry packages the research into mobile diagnosis, field scouting and targeted advisory alerts.",
-    governmentBody: "Agriculture officials validate cases, coordinate local support and measure whether the intervention reduces crop loss.",
-    impact: ["42", "5", "72%"], impactTargets: ["42", "5", "72%"],
-  },
-  {
-    id: "water", icon: "💧", title: "Water Leakage", category: "Water", district: "Hyderabad",
-    caseId: "TS-WAT-WAT-3118", reportTitle: "Repeated water leakage near residential road",
-    report: "Residents report a recurring water leak that floods the roadside and reduces supply pressure. The location has been reported multiple times but needs coordinated verification and repair.",
-    metrics: ["18", "4 days", "76/100"], metricLabels: ["citizen reports", "repeat window", "priority score"],
-    mapTitle: "PIPELINE ZONE", mapLabels: ["Leak 1", "Valve", "Ward 12"],
-    research: ["Leak clustering", "Pressure analysis", "Repair prioritization", "Demand mapping"],
-    industry: ["Smart meters", "Pressure sensors", "Leak alerts", "Repair dashboard"],
-    government: ["Water board verification", "Repair pilot", "Ward coordination", "Savings tracking"],
-    citizenBody: "Residents provide location, timing, photos and recurrence information that may be missing from fragmented maintenance records.",
-    universityBody: "Researchers combine reports with network and pressure patterns to prioritize likely leakage points and optimize repair planning.",
-    industryBody: "Industry converts the research into sensor-based monitoring, alerts and a maintenance dashboard.",
-    governmentBody: "The water authority verifies the fault, coordinates repair teams and tracks service improvement after deployment.",
-    impact: ["18", "4", "64%"], impactTargets: ["18", "4", "64%"],
-  },
-  {
-    id: "traffic", icon: "🚦", title: "Traffic Congestion", category: "Transport", district: "Bengaluru",
-    caseId: "KA-TRN-TRA-4227", reportTitle: "Daily congestion around school junction",
-    report: "Residents and students report heavy congestion near a school junction during morning and evening peaks. The problem needs evidence-based timing and routing rather than one-off complaints.",
-    metrics: ["63", "08–10", "84/100"], metricLabels: ["reports", "peak hours", "priority score"],
-    mapTitle: "CONGESTION CORRIDOR", mapLabels: ["School", "Junction", "Bus Stop"],
-    research: ["Traffic clustering", "Peak prediction", "Route simulation", "Signal optimization"],
-    industry: ["Camera analytics", "Traffic sensors", "Driver alerts", "Signal dashboard"],
-    government: ["Traffic police review", "Junction pilot", "School coordination", "Travel-time tracking"],
-    citizenBody: "Citizens report where queues form, when delays peak and which movements are most affected.",
-    universityBody: "Researchers model congestion patterns, simulate interventions and identify changes that can be tested safely.",
-    industryBody: "Industry supplies sensing, analytics and communication tools to turn the research into an operational system.",
-    governmentBody: "Transport authorities validate the bottleneck, run a controlled pilot and measure travel-time improvement.",
-    impact: ["63", "2", "69%"], impactTargets: ["63", "2", "69%"],
-  },
-  {
-    id: "waste", icon: "🗑️", title: "Waste Management", category: "Waste", district: "Visakhapatnam",
-    caseId: "AP-WST-WAS-5302", reportTitle: "Overflowing community waste collection points",
-    report: "Residents report recurring overflow at several waste collection points. The platform can cluster complaints, identify collection gaps and route the problem to research and municipal action.",
-    metrics: ["46", "3 days", "79/100"], metricLabels: ["reports", "repeat cycle", "priority score"],
-    mapTitle: "WASTE HOTSPOTS", mapLabels: ["Point A", "Point B", "Market"],
-    research: ["Hotspot clustering", "Collection prediction", "Route optimization", "Behavior analysis"],
-    industry: ["Fill-level sensors", "Route optimizer", "Worker app", "Alert system"],
-    government: ["Municipal verification", "Ward pilot", "Contractor coordination", "Cleanliness tracking"],
-    citizenBody: "Residents submit locations, frequency and photos so repeated collection failures become structured evidence instead of isolated complaints.",
-    universityBody: "Researchers identify spatial and temporal patterns and test better collection routes and schedules.",
-    industryBody: "Industry provides fill-level sensing, route optimization and operational alerts for sanitation teams.",
-    governmentBody: "Municipal officials verify hotspots, coordinate ward-level action and monitor cleanliness outcomes.",
-    impact: ["46", "6", "74%"], impactTargets: ["46", "6", "74%"],
-  },
-  {
-    id: "flood", icon: "🌊", title: "Flood Risk", category: "Disaster Management", district: "Guwahati",
-    caseId: "AS-DIS-FLO-6419", reportTitle: "Low-lying neighbourhood repeatedly waterlogged",
-    report: "Residents report repeated waterlogging after heavy rain. The platform can combine community observations with research into drainage and risk patterns before government action.",
-    metrics: ["31", "2 hrs", "91/100"], metricLabels: ["reports", "onset window", "risk score"],
-    mapTitle: "LOW-LYING ZONE", mapLabels: ["Drain", "Street", "Shelter"],
-    research: ["Flood-risk mapping", "Drainage analysis", "Rainfall patterns", "Safe-route modelling"],
-    industry: ["Water-level sensors", "Rain alerts", "Route guidance", "Emergency dashboard"],
-    government: ["Disaster cell review", "High-risk pilot", "Relief coordination", "Response tracking"],
-    citizenBody: "Residents provide real-time observations about water depth, blocked drains, access routes and affected locations.",
-    universityBody: "Researchers combine those observations with terrain, drainage and rainfall patterns to identify risk zones.",
-    industryBody: "Industry deploys sensors, alerts and route guidance to support earlier warnings and field response.",
-    governmentBody: "The disaster-management team validates risk zones, coordinates preparedness and measures response performance.",
-    impact: ["31", "4", "83%"], impactTargets: ["31", "4", "83%"],
-  },
-  {
-    id: "health", icon: "🏥", title: "Rural Healthcare", category: "Healthcare", district: "Nizamabad",
-    caseId: "TS-HLT-RUR-7524", reportTitle: "Difficulty accessing timely primary healthcare",
-    report: "Residents report long travel times and repeated difficulty reaching primary healthcare services. The platform can turn these observations into research and deployable service improvements.",
-    metrics: ["22", "38 km", "73/100"], metricLabels: ["reports", "avg. travel", "priority score"],
-    mapTitle: "SERVICE ACCESS", mapLabels: ["Village", "PHC", "Route"],
-    research: ["Access mapping", "Demand prediction", "Referral modelling", "Service gap analysis"],
-    industry: ["Telehealth kiosk", "Queue system", "Mobile alerts", "Care dashboard"],
-    government: ["Health dept. review", "Village pilot", "PHC coordination", "Access tracking"],
-    citizenBody: "Residents describe access barriers, travel time, service availability and recurring gaps in local healthcare.",
-    universityBody: "Researchers map service gaps, model demand and design evidence-based referral and access improvements.",
-    industryBody: "Industry converts validated research into telehealth, queueing, communication and monitoring tools.",
-    governmentBody: "Health officials verify the need, coordinate facilities and evaluate whether access improves after the pilot.",
-    impact: ["22", "3", "67%"], impactTargets: ["22", "3", "67%"],
-  },
-];
-
-const USE_CASE_STEPS = [
-  { key: "citizen", title: "Citizen report", subtitle: "Ground-level evidence", icon: User },
-  { key: "university", title: "University research", subtitle: "Analysis + validation", icon: GraduationCap },
-  { key: "industry", title: "Industry solution", subtitle: "Technology + pilot", icon: Building2 },
-  { key: "government", title: "Government action", subtitle: "Implementation + scale", icon: ShieldCheck },
-];
-
-function UseCaseSimulatorTab({ stage, setStage, selectedCaseId, setSelectedCaseId, onLoadReport }) {
-  const selected = USE_CASES.find((c) => c.id === selectedCaseId) || USE_CASES[0];
-  const stageIndex = stage;
-  const step = USE_CASE_STEPS[stageIndex];
-  const actionLabel = stageIndex === 0 ? "Send to University" : stageIndex === 1 ? "Start Industry Pilot" : stageIndex === 2 ? "Approve Government Pilot" : "Complete Deployment Demo";
-  const pct = stageIndex === 0 ? 0 : stageIndex === 1 ? 33 : stageIndex === 2 ? 67 : 100;
-
-  function advance() {
-    if (stageIndex < USE_CASE_STEPS.length - 1) setStage(stageIndex + 1);
-    else setStage(0);
-  }
-
-  const stageContent = {
-    citizen: ["1 · Citizen / Community", User, selected.citizenBody, selected.research.slice(0, 2).concat([selected.category, "Evidence + location"])],
-    university: ["2 · University / Research", GraduationCap, selected.universityBody, selected.research],
-    industry: ["3 · Industry Partner", Building2, selected.industryBody, selected.industry],
-    government: ["4 · Government / Department", ShieldCheck, selected.governmentBody, selected.government],
-  }[step.key];
-
-  return (
-    <div>
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-5">
-        <div>
-          <div className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: COLORS.rustDark }}>Live stakeholder routing · Demo simulation</div>
-          <h2 className="font-display text-2xl sm:text-3xl mt-1" style={{ color: COLORS.ink }}>🚀 One Citizen Statement · One Shared Case</h2>
-          <p className="text-sm mt-1.5 max-w-3xl" style={{ color: COLORS.inkSoft }}>
-            The problem is not pre-defined. Whatever the citizen writes in the report title and description is recorded as the case statement and routed to the relevant university, industry partners and government.
-          </p>
-        </div>
-        <button onClick={() => onLoadReport(selected)} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold" style={{ background: COLORS.rust, color: COLORS.white, boxShadow: SHADOW_MD }}>
-          <MessageSquarePlus size={14} /> Load example into Submit
-        </button>
-      </div>
-
-      <div className="rounded-xl p-4 mb-5" style={{ background: COLORS.white, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_SM }}>
-        <div className="grid sm:grid-cols-4 gap-3">
-          {[
-            ["1", "Citizen statement", "Title + description are preserved exactly as the case narrative."],
-            ["2", "University research", "AI routes the domain to a relevant faculty / research team."],
-            ["3", "Industry solution", "Relevant partners receive the case for solution and funding support."],
-            ["4", "Government action", "The department receives the same case for verification and implementation."],
-          ].map(([n, title, body]) => (
-            <div key={n} className="rounded-lg p-3" style={{ background: COLORS.paper }}>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: COLORS.forest, color: COLORS.white }}>{n}</div>
-              <div className="text-xs font-semibold mt-2" style={{ color: COLORS.ink }}>{title}</div>
-              <div className="text-[10px] mt-1 leading-4" style={{ color: COLORS.inkSoft }}>{body}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl p-4 sm:p-5 mb-6" style={{ background: "linear-gradient(135deg,#F3EDE0,#F8F6EF)", border: `1px solid ${COLORS.line}` }}>
-        <div className="flex flex-col md:flex-row md:items-center gap-4">
-          {USE_CASE_STEPS.map((item, i) => {
-            const Icon = item.icon; const active = i === stageIndex; const done = i < stageIndex;
-            return <React.Fragment key={item.key}>
-              <button onClick={() => setStage(i)} className="flex-1 text-left rounded-lg p-3 transition-all" style={{ background: active ? COLORS.white : "transparent", border: `1px solid ${active ? COLORS.rust + "88" : "transparent"}`, boxShadow: active ? SHADOW_SM : "none" }}>
-                <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: done || active ? COLORS.forest : COLORS.paperDark, color: done || active ? COLORS.white : COLORS.inkSoft }}>{done ? <CheckCircle2 size={15} /> : <Icon size={15} />}</div><div><div className="text-xs font-semibold" style={{ color: COLORS.ink }}>{item.title}</div><div className="text-[10px]" style={{ color: COLORS.inkSoft }}>{item.subtitle}</div></div></div>
-              </button>
-              {i < USE_CASE_STEPS.length - 1 && <ArrowRight size={15} className="hidden md:block shrink-0" style={{ color: i < stageIndex ? COLORS.forest : COLORS.line }} />}
-            </React.Fragment>;
-          })}
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-5">
-        <div className="space-y-5">
-          <div className="rounded-xl p-5" style={{ background: COLORS.white, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_SM }}>
-            <div className="flex items-start justify-between gap-3">
-              <div><CaseStamp>{selected.caseId}</CaseStamp><h3 className="font-display text-xl mt-2">{selected.icon} {selected.reportTitle}</h3></div>
-              <span className="text-[10px] font-mono px-2 py-1 rounded-full" style={{ background: COLORS.forest + "14", color: COLORS.forest }}>EXAMPLE CASE · SAME ROUTING PIPELINE</span>
-            </div>
-            <p className="text-sm mt-3 leading-6" style={{ color: COLORS.inkSoft }}>“{selected.report}”</p>
-            <div className="grid sm:grid-cols-3 gap-2 mt-4">
-              {selected.metrics.map((m, i) => <div key={i} className="rounded-lg p-3" style={{ background: COLORS.paper }}><div className="text-[10px] font-mono" style={{ color: COLORS.inkSoft }}>{selected.metricLabels[i].toUpperCase()}</div><div className="text-lg font-semibold" style={{ color: i === 2 ? COLORS.rust : COLORS.ink }}>{m}</div><div className="text-[10px]" style={{ color: COLORS.inkSoft }}>demo metric</div></div>)}
-            </div>
-          </div>
-          <DemoPanel title={stageContent[0]} icon={stageContent[1]} body={stageContent[2]} chips={stageContent[3]} />
-        </div>
-
-        <div className="space-y-5">
-          <div className="rounded-xl p-5" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}` }}>
-            <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: COLORS.inkSoft }}>{selected.mapTitle} · schematic</div>
-            <div className="relative mt-3 h-56 rounded-lg overflow-hidden" style={{ background: "#EAF0E7", border: `1px solid ${COLORS.line}` }}>
-              <div className="absolute left-4 top-4 text-[10px] font-mono" style={{ color: COLORS.forest }}>{selected.mapTitle}</div>
-              <div className="absolute left-8 top-9 w-44 h-20 rounded-[50%] rotate-[-12deg]" style={{ background: COLORS.forest + "28", border: `2px dashed ${COLORS.forest}88` }} />
-              {selected.mapLabels.map((label, i) => <div key={label} className="absolute" style={{ left: `${24 + i * 25}%`, top: `${58 + (i % 2) * 13}%` }}><div className="w-3 h-3 rounded-full" style={{ background: COLORS.rust, boxShadow: `0 0 0 5px ${COLORS.rust}20` }} /><div className="text-[9px] font-semibold mt-1" style={{ color: COLORS.ink }}>{label}</div></div>)}
-              <div className="absolute left-[38%] top-[30%] h-[80px] border-l-2 border-dashed" style={{ borderColor: COLORS.rust + "88", transform: "rotate(24deg)" }} />
-              <div className="absolute right-3 bottom-3 text-[9px] font-mono px-2 py-1 rounded" style={{ background: COLORS.white + "CC", color: COLORS.inkSoft }}>schematic · not live GIS</div>
-            </div>
-          </div>
-
-          <div className="rounded-xl p-5" style={{ background: COLORS.white, border: `1px solid ${COLORS.line}` }}>
-            <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: COLORS.inkSoft }}>Pipeline progress — demo simulation</div>
-            <div className="space-y-3 mt-4">
-              <ImpactRow label="Workflow completion" value={`${pct}%`} target="100%" pct={pct} />
-              <ImpactRow label="Representative reports" value={selected.metrics[0]} target={selected.metrics[0]} pct={100} />
-              <ImpactRow label="Demo outcome score" value={selected.metrics[2]} target="100" pct={parseInt(selected.metrics[2], 10)} />
-            </div>
-          </div>
-
-          <button onClick={advance} className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold" style={{ background: stageIndex === 3 ? COLORS.forest : COLORS.rust, color: COLORS.white, boxShadow: SHADOW_MD }}>
-            {actionLabel} <ArrowRight size={15} />
-          </button>
-          <div className="text-[10px] text-center font-mono" style={{ color: COLORS.inkSoft }}>Example case: {selected.reportTitle} · Stage: {step.title} · Use the Submit tab to create your own live case.</div>
-        </div>
-      </div>
-
-      <div className="rounded-xl p-4 mt-6" style={{ background: COLORS.forest + "0D", border: `1px solid ${COLORS.forest}33` }}>
-        <div className="flex gap-3"><Sparkles size={18} style={{ color: COLORS.forest }} /><div><div className="text-xs font-semibold" style={{ color: COLORS.ink }}>Why this makes the solution unique</div><p className="text-xs mt-1 leading-5" style={{ color: COLORS.inkSoft }}>The project is not an elephant app, crop app, traffic app or waste app. Those are only representative cases. The core innovation is the cross-stakeholder routing layer that turns a citizen problem into a university research task, an industry-backed prototype and a government implementation workflow.</p></div></div>
-      </div>
-    </div>
-  );
-}
-
-function DemoPanel({ title, icon: Icon, body, chips }) {
-  return <div className="rounded-xl p-5" style={{ background: COLORS.paper, border: `1px solid ${COLORS.line}` }}>
-    <div className="flex items-center gap-2"><Icon size={17} style={{ color: COLORS.rust }} /><h3 className="font-semibold text-sm" style={{ color: COLORS.ink }}>{title}</h3></div>
-    <p className="text-sm mt-2 leading-6" style={{ color: COLORS.inkSoft }}>{body}</p>
-    <div className="flex flex-wrap gap-2 mt-4">{chips.map((c) => <span key={c} className="text-[10px] font-mono px-2 py-1 rounded-full" style={{ background: COLORS.white, color: COLORS.ink, border: `1px solid ${COLORS.line}` }}>{c}</span>)}</div>
-  </div>;
-}
-
-function ImpactRow({ label, value, target, pct }) {
-  return <div><div className="flex justify-between text-xs"><span style={{ color: COLORS.inkSoft }}>{label}</span><span className="font-mono font-semibold" style={{ color: COLORS.ink }}>{value} / {target}</span></div><div className="mt-1"><ScoreBar pct={pct} color={COLORS.forest} /></div></div>;
-}
-
 function AppContent() {
   const { language, setLanguage, t } = useLanguage();
   const [problems, setProblems] = useState(SEED);
@@ -2080,8 +1837,6 @@ function AppContent() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [useCaseStage, setUseCaseStage] = useState(0);
-  const [selectedUseCaseId, setSelectedUseCaseId] = useState("elephant");
   const nextId = useRef(4000);
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -2126,7 +1881,6 @@ function AppContent() {
     { id: "match", label: t("facultyMatch"), icon: GraduationCap },
     { id: "dashboard", label: t("controlRoom"), icon: LayoutDashboard },
     { id: "lifecycle", label: t("caseFiles"), icon: Workflow },
-    { id: "use-case-demo", label: "🚀 Use Case Simulator", icon: Radio },
   ];
   const allowedTabIds = user ? ROLE_META[user.role].tabs : [];
   const TABS = ALL_TABS.filter((t) => allowedTabIds.includes(t.id));
@@ -2141,12 +1895,6 @@ function AppContent() {
   }
   function handleQuickFill(sample) {
     setForm({ ...form, title: sample.title, description: sample.description, district: sample.district });
-  }
-  function handleLoadUseCaseReport(useCase) {
-    const c = useCase || USE_CASES[0];
-    setForm((f) => ({ ...f, title: c.reportTitle, description: c.report, district: c.district, category: c.category }));
-    setTab("submit");
-    showToast(`${c.title} representative report loaded. Submit it to show the AI routing flow.`);
   }
 
   function handleVoice() {
@@ -2446,7 +2194,6 @@ function AppContent() {
                 <MatchTab problems={problems} user={user} selectedId={selectedId} setSelectedId={setSelectedId} onAssign={handleAssign} />
               )}
               {tab === "dashboard" && <DashboardTab problems={problems} />}
-              {tab === "use-case-demo" && <UseCaseSimulatorTab stage={useCaseStage} setStage={setUseCaseStage} selectedCaseId={selectedUseCaseId} setSelectedCaseId={setSelectedUseCaseId} onLoadReport={handleLoadUseCaseReport} />}
               {tab === "lifecycle" && (
                 <LifecycleTab problems={problems} user={user} onAdvance={handleAdvance} onPledge={handlePledge} onLogExpense={handleLogExpense} onGoToMatch={handleOpenMatch} />
               )}
