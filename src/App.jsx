@@ -408,7 +408,7 @@ const STAGES = ["Logged", "Assigned to University", "Prototype in Development", 
 const ROLE_META = {
   Citizen: { label: "Citizen", demoName: "Meera Devi", demoSub: "Resident, Chatra district", icon: User, desc: "Report a problem and see how many others share it.", tabs: ["submit", "clusters", "use-case-demo"], password: "citizen123", scopeNote: "Sees full detail only on cases they personally filed; other cases appear as redacted public summaries." },
   Faculty: { label: "University Faculty", demoName: "Dr. R. Oraon", demoSub: "BIT Mesra", icon: GraduationCap, desc: "Review clustered cases and take on ones matching your research.", tabs: ["clusters", "match", "lifecycle", "use-case-demo"], password: "faculty123", scopeNote: "Sees the open, unassigned pool plus only their own assigned cases — not other institutions' active work." },
-  Industry: { label: "Industry Partner", demoName: "Anil Verma", demoSub: "Sal Valley Ventures", icon: Building2, desc: "Co-fund and track prototypes moving toward deployment.", tabs: ["clusters", "lifecycle", "use-case-demo"], password: "industry123", scopeNote: "Sees only cases that have reached Industry Partnership stage or later — not raw citizen submissions." },
+  Industry: { label: "Industry Partner", demoName: "Anil Verma", demoSub: "Sal Valley Ventures", icon: Building2, desc: "Review routed citizen cases and support solutions moving toward deployment.", tabs: ["clusters", "lifecycle", "use-case-demo"], password: "industry123", scopeNote: "Sees citizen cases explicitly routed to industry, including newly recorded cases before a pilot begins." },
   Government: { label: "Government Official", demoName: "S. Kumari", demoSub: "Dept. of Higher & Technical Education", icon: LayoutDashboard, desc: "Full oversight — submissions, routing, funding and analytics.", tabs: ["submit", "clusters", "match", "dashboard", "lifecycle", "use-case-demo"], password: "govt2026", scopeNote: "Unrestricted access — the only role that can see every case, every stage, statewide." },
 };
 
@@ -416,7 +416,7 @@ const ROLE_META = {
 function scopeProblems(problems, user) {
   if (!user || user.role === "Government") return problems;
   if (user.role === "Faculty") return problems.filter((p) => !p.matchedFaculty || p.matchedFaculty.startsWith(user.name));
-  if (user.role === "Industry") return problems.filter((p) => ["Industry Partnership", "Piloting", "Deployed"].includes(p.status));
+  if (user.role === "Industry") return problems.filter((p) => p.sharedWithIndustry || ["Industry Partnership", "Piloting", "Deployed"].includes(p.status));
   return problems; // Citizen: scoping is applied at render time (ownership-based redaction), not by filtering the list
 }
 
@@ -878,6 +878,12 @@ function FullCaseCard({ p, highlightId, onOpenMatch }) {
         <span className="flex items-center gap-1 text-[11px] font-mono" style={{ color: COLORS.rustDark }}><Users size={11} />{p.votes} {t("citizensReported")}</span>
       </div>
       {p.reportedBy && <div className="text-[10px] mt-1.5 italic" style={{ color: COLORS.inkSoft }}>Filed by {p.reportedBy}</div>}
+      {p.sharedWithIndustry && (
+        <div className="mt-3 rounded-md px-2.5 py-2 text-[10px]" style={{ background: COLORS.forest + "0C", border: `1px solid ${COLORS.forest}2E`, color: COLORS.forest }}>
+          <div className="font-semibold flex items-center gap-1"><Send size={10} /> Recorded case routed to stakeholders</div>
+          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1" style={{ color: COLORS.inkSoft }}>🎓 University · 🏭 Industry Partner · 🏛️ Government</div>
+        </div>
+      )}
       <div className="mt-3">
         <UrgencyMeter problem={p} />
       </div>
@@ -1952,29 +1958,31 @@ function UseCaseSimulatorTab({ stage, setStage, selectedCaseId, setSelectedCaseI
     <div>
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-5">
         <div>
-          <div className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: COLORS.rustDark }}>Judge-ready use case simulator · Demo simulation</div>
-          <h2 className="font-display text-2xl sm:text-3xl mt-1" style={{ color: COLORS.ink }}>🚀 One Platform · Multiple Societal Problems</h2>
+          <div className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: COLORS.rustDark }}>Live stakeholder routing · Demo simulation</div>
+          <h2 className="font-display text-2xl sm:text-3xl mt-1" style={{ color: COLORS.ink }}>🚀 One Citizen Statement · One Shared Case</h2>
           <p className="text-sm mt-1.5 max-w-3xl" style={{ color: COLORS.inkSoft }}>
-            Samadhan Setu is problem-agnostic. Select any example below and demonstrate the same citizen → university → industry → government pipeline. The examples use simulated data for the prototype demo.
+            The problem is not pre-defined. Whatever the citizen writes in the report title and description is recorded as the case statement and routed to the relevant university, industry partners and government.
           </p>
         </div>
         <button onClick={() => onLoadReport(selected)} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold" style={{ background: COLORS.rust, color: COLORS.white, boxShadow: SHADOW_MD }}>
-          <MessageSquarePlus size={14} /> Load selected report into Submit
+          <MessageSquarePlus size={14} /> Load example into Submit
         </button>
       </div>
 
       <div className="rounded-xl p-4 mb-5" style={{ background: COLORS.white, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_SM }}>
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <div><div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: COLORS.inkSoft }}>Select a representative problem</div><div className="text-sm font-semibold mt-1" style={{ color: COLORS.ink }}>The workflow stays the same; only the domain changes.</div></div>
-          <span className="text-[10px] font-mono px-2 py-1 rounded-full" style={{ background: COLORS.forest + "14", color: COLORS.forest }}>7 use cases</span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-          {USE_CASES.map((c) => {
-            const active = c.id === selected.id;
-            return <button key={c.id} onClick={() => { setSelectedCaseId(c.id); setStage(0); }} className="rounded-lg p-3 text-left transition-all" style={{ background: active ? COLORS.paper : COLORS.card, border: `1px solid ${active ? COLORS.rust + "99" : COLORS.line}`, boxShadow: active ? SHADOW_SM : "none" }}>
-              <div className="text-xl">{c.icon}</div><div className="text-[11px] font-semibold mt-1" style={{ color: COLORS.ink }}>{c.title}</div><div className="text-[9px] mt-1" style={{ color: COLORS.inkSoft }}>{c.category}</div>
-            </button>;
-          })}
+        <div className="grid sm:grid-cols-4 gap-3">
+          {[
+            ["1", "Citizen statement", "Title + description are preserved exactly as the case narrative."],
+            ["2", "University research", "AI routes the domain to a relevant faculty / research team."],
+            ["3", "Industry solution", "Relevant partners receive the case for solution and funding support."],
+            ["4", "Government action", "The department receives the same case for verification and implementation."],
+          ].map(([n, title, body]) => (
+            <div key={n} className="rounded-lg p-3" style={{ background: COLORS.paper }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: COLORS.forest, color: COLORS.white }}>{n}</div>
+              <div className="text-xs font-semibold mt-2" style={{ color: COLORS.ink }}>{title}</div>
+              <div className="text-[10px] mt-1 leading-4" style={{ color: COLORS.inkSoft }}>{body}</div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -1997,7 +2005,7 @@ function UseCaseSimulatorTab({ stage, setStage, selectedCaseId, setSelectedCaseI
           <div className="rounded-xl p-5" style={{ background: COLORS.white, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_SM }}>
             <div className="flex items-start justify-between gap-3">
               <div><CaseStamp>{selected.caseId}</CaseStamp><h3 className="font-display text-xl mt-2">{selected.icon} {selected.reportTitle}</h3></div>
-              <span className="text-[10px] font-mono px-2 py-1 rounded-full" style={{ background: COLORS.forest + "14", color: COLORS.forest }}>REPRESENTATIVE CASE</span>
+              <span className="text-[10px] font-mono px-2 py-1 rounded-full" style={{ background: COLORS.forest + "14", color: COLORS.forest }}>EXAMPLE CASE · SAME ROUTING PIPELINE</span>
             </div>
             <p className="text-sm mt-3 leading-6" style={{ color: COLORS.inkSoft }}>“{selected.report}”</p>
             <div className="grid sm:grid-cols-3 gap-2 mt-4">
@@ -2031,7 +2039,7 @@ function UseCaseSimulatorTab({ stage, setStage, selectedCaseId, setSelectedCaseI
           <button onClick={advance} className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold" style={{ background: stageIndex === 3 ? COLORS.forest : COLORS.rust, color: COLORS.white, boxShadow: SHADOW_MD }}>
             {actionLabel} <ArrowRight size={15} />
           </button>
-          <div className="text-[10px] text-center font-mono" style={{ color: COLORS.inkSoft }}>Current use case: {selected.title} · Stage: {step.title} · Click the cards above to jump.</div>
+          <div className="text-[10px] text-center font-mono" style={{ color: COLORS.inkSoft }}>Example case: {selected.reportTitle} · Stage: {step.title} · Use the Submit tab to create your own live case.</div>
         </div>
       </div>
 
@@ -2237,7 +2245,7 @@ function AppContent() {
     } else {
       const code = CODES[category] || "GEN";
       const num = nextId.current++;
-      let newProblem = { id: num, caseNo: `JH-${code}-${num}`, category, district: form.district, title: form.title, description: form.description, votes: 1, status: "Logged", matchedFaculty: null, daysAgo: 0, fundingGoal: 0, fundingPledged: 0, sdg, reportedBy: user?.name || "a district resident" };
+      let newProblem = { id: num, caseNo: `JH-${code}-${num}`, category, district: form.district, title: form.title, description: form.description, votes: 1, status: "Logged", matchedFaculty: null, daysAgo: 0, fundingGoal: 0, fundingPledged: 0, sdg, reportedBy: user?.name || "a district resident", sharedWithUniversity: true, sharedWithIndustry: true, sharedWithGovernment: true, routingStatus: "Recorded & routed", routedAt: Date.now() };
 
       // Domain-based auto-routing: skip the manual "Find a faculty match" step whenever a
       // confident faculty match exists for this case's category, and notify that faculty directly.
@@ -2255,9 +2263,9 @@ function AppContent() {
       setProblems((prev) => [newProblem, ...prev]);
       setHighlightId(num);
       if (routed) {
-        showToast(`New case opened: ${newProblem.caseNo} — ${manual ? `logged under ${category}` : "auto-detected as " + category} and routed directly to ${routed.name} (${routed.inst}), notified now.`);
+        showToast(`Report recorded: ${newProblem.caseNo} — sent to ${routed.name} (${routed.inst}), industry partners and government.`);
       } else {
-        showToast(`No strong faculty match (${Math.round((top?.score || 0) * 100)}% max) — new case opened: ${newProblem.caseNo}, awaiting faculty review.`);
+        showToast(`Report recorded: ${newProblem.caseNo} — routed to university, industry partners and government; university matching is pending.`);
       }
     }
     setForm({ title: "", description: "", district: form.district, language: form.language, category: "" });
