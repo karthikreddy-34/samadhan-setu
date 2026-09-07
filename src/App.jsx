@@ -421,35 +421,35 @@ function scopeProblems(problems, user) {
 }
 
 const SEED = [
-  { id: 1, caseNo: "JH-WTR-1042", category: "Water", district: "Chatra", title: "Community handpump has run dry", description: "Community handpump has been dry for three months. Women and children are walking nearly two kilometres daily to fetch drinking water from the neighbouring village.", votes: 46, status: "Assigned to University", matchedFaculty: "Dr. R. Oraon · BIT Mesra", daysAgo: 52, fundingGoal: 0, fundingPledged: 0 },
-  { id: 2, caseNo: "JH-EDU-1043", category: "Education", district: "Gumla", title: "No science teacher for two years", description: "No science teacher has been posted at the government high school for two years. Students are self-studying from old notes before board exams.", votes: 31, status: "Prototype in Development", matchedFaculty: "Dr. K. Singh · Ranchi University", daysAgo: 61, fundingGoal: 0, fundingPledged: 0 },
-  { id: 3, caseNo: "JH-HLT-1044", category: "Healthcare", district: "Simdega", title: "Sub-health centre has no doctor visits", description: "The sub-health centre has had no doctor visits since last winter. Pregnant women now travel eighteen kilometres for routine checkups.", votes: 58, status: "Industry Partnership", matchedFaculty: "Dr. M. Toppo · RIMS, Ranchi", daysAgo: 74, fundingGoal: 150000, fundingPledged: 95000, fundingUsed: 61000, fundingPartner: "Plateau Health Foundation", expenses: [
+  { id: 1, caseNo: "JH-WTR-1042", category: "Water", district: "Chatra", title: "Community handpump has run dry", description: "Community handpump has been dry for three months, forcing women and children to walk nearly two kilometres daily to fetch drinking water from the neighbouring village. The groundwater table in this hamlet has dropped sharply after two weak monsoons, and the panchayat's request for a new borewell has been pending for over a year with no site survey conducted yet. Elderly residents and pregnant women are worst affected, since the daily trip eats into time otherwise spent on farm work, schooling, or rest. The issue has been raised at three separate gram sabha meetings, but no written response has come from the block water resources office so far.", summary: "Community handpump has been dry for three months, forcing daily two-kilometre water trips.", votes: 46, status: "Assigned to University", matchedFaculty: "Dr. R. Oraon · BIT Mesra", daysAgo: 52, fundingGoal: 0, fundingPledged: 0 },
+  { id: 2, caseNo: "JH-EDU-1043", category: "Education", district: "Gumla", title: "No science teacher for two years", description: "No science teacher has been posted at the government high school for two years, leaving close to 140 students across classes 9 and 10 without formal instruction in physics, chemistry, or biology. Students are self-studying from old notes and photocopied textbooks passed between classmates, with almost no practical lab exposure ahead of their board exams. The school's single science laboratory now sits mostly unused, and the classroom meant for science periods has been repurposed for general assembly instead. Parents have submitted three written requests to the block education office, but the vacancy remains unfilled due to a district-wide shortage of qualified science teachers.", summary: "No science teacher posted for two years; students are self-studying ahead of board exams.", votes: 31, status: "Prototype in Development", matchedFaculty: "Dr. K. Singh · Ranchi University", daysAgo: 61, fundingGoal: 0, fundingPledged: 0 },
+  { id: 3, caseNo: "JH-HLT-1044", category: "Healthcare", district: "Simdega", title: "Sub-health centre has no doctor visits", description: "The sub-health centre has had no doctor visits since last winter, despite serving roughly a dozen surrounding villages with a combined population of over six thousand people. Pregnant women now travel eighteen kilometres to the nearest functioning clinic for routine checkups, often relying on shared jeeps that run only twice a day. At least two high-risk pregnancies flagged by the local ASHA worker have gone unmonitored through the third trimester due to the lack of a resident doctor. The centre's pharmacy has also been out of basic medicines for over two months, compounding the effect of the staffing gap on maternal and general health.", summary: "Sub-health centre has had no doctor visits since last winter; pregnant women travel far for checkups.", votes: 58, status: "Industry Partnership", matchedFaculty: "Dr. M. Toppo · RIMS, Ranchi", daysAgo: 74, fundingGoal: 150000, fundingPledged: 95000, fundingUsed: 61000, fundingPartner: "Plateau Health Foundation", expenses: [
     { id: "e3-1", amount: 32000, note: "Telemedicine kiosk hardware", by: "Dr. M. Toppo", at: 1 },
     { id: "e3-2", amount: 29000, note: "Community health worker stipends (2 months)", by: "Dr. M. Toppo", at: 2 },
   ] },
-  { id: 4, caseNo: "JH-AGR-1045", category: "Agriculture", district: "West Singhbhum", title: "Wild elephants damage paddy every season", description: "Wild elephants damage the paddy fields every harvest season, and families lose an entire season's income overnight with no compensation process.", votes: 39, status: "Prototype in Development", matchedFaculty: "Dr. S. Kujur · BAU Ranchi", daysAgo: 40, fundingGoal: 0, fundingPledged: 0 },
-  { id: 5, caseNo: "JH-AGR-1046", category: "Agriculture", district: "Ramgarh", title: "No cold storage for tomato farmers", description: "There is no cold storage facility for tomato farmers nearby, so nearly a third of the harvest rots before it reaches the market.", votes: 22, status: "Logged", matchedFaculty: null, daysAgo: 9, fundingGoal: 0, fundingPledged: 0 },
-  { id: 6, caseNo: "JH-ENV-1047", category: "Environment", district: "East Singhbhum", title: "Illegal mining clouding the river", description: "Illegal sand and stone mining upstream has turned the river water cloudy and undrinkable for three villages downstream.", votes: 44, status: "Assigned to University", matchedFaculty: "Dr. N. Verma · Vinoba Bhave University", daysAgo: 35, fundingGoal: 0, fundingPledged: 0 },
-  { id: 7, caseNo: "JH-ENV-1048", category: "Environment", district: "Khunti", title: "Sal forest clearing has dried up springs", description: "Sal forest clearing near the hills has dried up two natural springs that the village depended on for drinking and irrigation.", votes: 18, status: "Logged", matchedFaculty: null, daysAgo: 6, fundingGoal: 0, fundingPledged: 0 },
-  { id: 8, caseNo: "JH-NRG-1049", category: "Energy", district: "Dhanbad", title: "Six to eight hour daily power cuts", description: "Power cuts of six to eight hours daily are shutting down small welding and workshop units, cutting into already thin margins.", votes: 27, status: "Logged", matchedFaculty: null, daysAgo: 14, fundingGoal: 0, fundingPledged: 0 },
-  { id: 9, caseNo: "JH-URB-1050", category: "Urban Development", district: "Ranchi", title: "Ward 12 floods every monsoon", description: "Ward 12 floods every monsoon because the stormwater drains were never connected to the main channel during the last road expansion.", votes: 63, status: "Deployed", matchedFaculty: "Dr. A. Mahto · IIT (ISM) Dhanbad", daysAgo: 210, fundingGoal: 220000, fundingPledged: 220000, fundingUsed: 218500, fundingPartner: "Mesra Innovation & Incubation Cell", expenses: [
+  { id: 4, caseNo: "JH-AGR-1045", category: "Agriculture", district: "West Singhbhum", title: "Wild elephants damage paddy every season", description: "Wild elephants damage the paddy fields every harvest season, entering from the adjoining forest corridor at night and trampling entire plots within a few hours. Families across this cluster of villages lose an entire season's income overnight, with no compensation process currently reaching them despite repeated complaints filed with the forest department. Farmers have tried makeshift solar fencing and night-time drum patrols, but neither has meaningfully reduced how often the herds return. Since paddy is the primary crop for most households here, the recurring losses are pushing several families toward debt before the next planting cycle even begins.", summary: "Wild elephants damage paddy fields every harvest season, wiping out a season's income overnight.", votes: 39, status: "Prototype in Development", matchedFaculty: "Dr. S. Kujur · BAU Ranchi", daysAgo: 40, fundingGoal: 0, fundingPledged: 0 },
+  { id: 5, caseNo: "JH-AGR-1046", category: "Agriculture", district: "Ramgarh", title: "No cold storage for tomato farmers", description: "There is no cold storage facility for tomato farmers within roughly forty kilometres, so nearly a third of the harvest rots before it reaches the market during peak season. Farmers currently sell at throwaway prices to middlemen who arrive with refrigerated trucks, since holding the produce even two extra days risks spoiling the entire batch. A proposed cooperative cold-storage unit was discussed three years ago but never moved past the planning stage due to funding gaps between the panchayat and the agriculture department. Better storage infrastructure could directly raise farmgate prices and cut post-harvest losses for dozens of tomato-growing villages nearby.", summary: "No cold storage for tomato farmers nearby, so nearly a third of the harvest rots before sale.", votes: 22, status: "Logged", matchedFaculty: null, daysAgo: 9, fundingGoal: 0, fundingPledged: 0 },
+  { id: 6, caseNo: "JH-ENV-1047", category: "Environment", district: "East Singhbhum", title: "Illegal mining clouding the river", description: "Illegal sand and stone mining upstream has turned the river water cloudy and undrinkable for three villages downstream, with visible silt deposits now reaching stretches that previously stayed clear year-round. Local fishing catches have dropped noticeably over the past two seasons, and several households that once relied on the river for both drinking and irrigation have had to switch to handpumps instead. Villagers have reported the illegal mining operation to the district mining office twice, but enforcement visits have been irregular and no action has followed. Continued pollution also risks longer-term contamination of the groundwater table feeding nearby wells.", summary: "Illegal mining upstream has turned the river cloudy and undrinkable for three villages downstream.", votes: 44, status: "Assigned to University", matchedFaculty: "Dr. N. Verma · Vinoba Bhave University", daysAgo: 35, fundingGoal: 0, fundingPledged: 0 },
+  { id: 7, caseNo: "JH-ENV-1048", category: "Environment", district: "Khunti", title: "Sal forest clearing has dried up springs", description: "Sal forest clearing near the hills has dried up two natural springs that the village depended on for both drinking water and irrigating its terraced fields. The clearing, linked to unregulated timber extraction over the past three years, has visibly thinned the tree cover on the upper slopes that once retained monsoon runoff through the dry months. Since the springs failed, women now walk an extra forty minutes to the nearest alternative source, and terrace farmers have had to abandon part of their rabi crop for lack of irrigation water. Village elders say this is the first time in living memory that both springs have dried up in the same year.", summary: "Sal forest clearing has dried up two natural springs the village depended on.", votes: 18, status: "Logged", matchedFaculty: null, daysAgo: 6, fundingGoal: 0, fundingPledged: 0 },
+  { id: 8, caseNo: "JH-NRG-1049", category: "Energy", district: "Dhanbad", title: "Six to eight hour daily power cuts", description: "Power cuts of six to eight hours daily are shutting down small welding and workshop units across this industrial cluster, cutting into already thin margins for roughly thirty small business owners. Most units run diesel generators as a stopgap, but rising fuel costs have made that an unsustainable long-term fix for daily operations. The outages tend to cluster in the afternoon, exactly when workshops need continuous power for cutting and welding equipment that can't tolerate frequent restarts. Business owners have petitioned the local electricity board for a dedicated feeder line but have not received a firm timeline for approval.", summary: "Six to eight hour daily power cuts are shutting down small welding and workshop units.", votes: 27, status: "Logged", matchedFaculty: null, daysAgo: 14, fundingGoal: 0, fundingPledged: 0 },
+  { id: 9, caseNo: "JH-URB-1050", category: "Urban Development", district: "Ranchi", title: "Ward 12 floods every monsoon", description: "Ward 12 floods every monsoon because the stormwater drains were never connected to the main channel during the last road expansion project nearly six years ago. Water pools to knee-depth on the main road within an hour of heavy rain, cutting off access for two-wheelers and stranding residents in low-lying homes along the ward's eastern stretch. Local shopkeepers report recurring stock damage each monsoon season, and the municipal corporation's temporary desilting measures have not addressed the underlying connectivity gap in the drainage network. Residents have filed the same complaint for three consecutive monsoon seasons without a permanent fix being scheduled.", summary: "Ward 12 floods every monsoon due to stormwater drains never connected to the main channel.", votes: 63, status: "Deployed", matchedFaculty: "Dr. A. Mahto · IIT (ISM) Dhanbad", daysAgo: 210, fundingGoal: 220000, fundingPledged: 220000, fundingUsed: 218500, fundingPartner: "Mesra Innovation & Incubation Cell", expenses: [
     { id: "e9-1", amount: 140000, note: "Stormwater sensor network + install", by: "Dr. A. Mahto", at: 1 },
     { id: "e9-2", amount: 52000, note: "GIS drainage mapping survey", by: "Dr. A. Mahto", at: 2 },
     { id: "e9-3", amount: 26500, note: "Field crew + equipment transport", by: "Dr. A. Mahto", at: 3 },
   ] },
-  { id: 10, caseNo: "JH-URB-1051", category: "Urban Development", district: "Bokaro", title: "No street lighting for a kilometre", description: "There is no street lighting for almost a kilometre on the main road, and residents avoid walking after dark.", votes: 15, status: "Logged", matchedFaculty: null, daysAgo: 4, fundingGoal: 0, fundingPledged: 0 },
-  { id: 11, caseNo: "JH-ACC-1052", category: "Accessibility", district: "Hazaribagh", title: "Block office has no ramp", description: "The block office has no ramp, so wheelchair users are carried up the stairs by strangers for every single visit.", votes: 12, status: "Logged", matchedFaculty: null, daysAgo: 8, fundingGoal: 0, fundingPledged: 0 },
-  { id: 12, caseNo: "JH-LVH-1053", category: "Rural Livelihoods", district: "Dumka", title: "Artisans have no market beyond the haat", description: "Handicraft artisans have no market beyond the weekly haat, and most of their work sells for a fraction of its real worth.", votes: 29, status: "Assigned to University", matchedFaculty: "Dr. P. Hansda · XISS, Ranchi", daysAgo: 45, fundingGoal: 0, fundingPledged: 0 },
-  { id: 13, caseNo: "JH-LVH-1054", category: "Rural Livelihoods", district: "Khunti", title: "Lac cultivators use decades-old methods", description: "Lac cultivators still rely on decades-old processing methods, which cuts deeply into both yield and quality compared to nearby states.", votes: 17, status: "Logged", matchedFaculty: null, daysAgo: 11, fundingGoal: 0, fundingPledged: 0 },
-  { id: 14, caseNo: "JH-ADM-1055", category: "Public Administration", district: "Godda", title: "Caste certificate pending six months", description: "Caste certificate applications have been pending for over six months with no update on status available to the applicant.", votes: 34, status: "Logged", matchedFaculty: null, daysAgo: 20, fundingGoal: 0, fundingPledged: 0 },
-  { id: 15, caseNo: "JH-WTR-1056", category: "Water", district: "Sahibganj", title: "Arsenic levels above safe limits", description: "Groundwater tests show arsenic levels above safe limits in three hamlets, but no alternative water source has been provided yet.", votes: 21, status: "Logged", matchedFaculty: null, daysAgo: 13, fundingGoal: 0, fundingPledged: 0 },
-  { id: 16, caseNo: "JH-EDU-1057", category: "Education", district: "Latehar", title: "School roof collapsed after monsoon", description: "The school building roof partially collapsed after monsoon rains, and classes now run in the open courtyard without any shelter.", votes: 25, status: "Logged", matchedFaculty: null, daysAgo: 17, fundingGoal: 0, fundingPledged: 0 },
-  { id: 17, caseNo: "JH-HLT-1058", category: "Healthcare", district: "Palamu", title: "Anganwadi centres out of nutrition supplies", description: "Anganwadi centres have lacked basic nutrition supplies for three consecutive months, and malnutrition checks have stopped entirely.", votes: 33, status: "Piloting", matchedFaculty: "Dr. M. Toppo · RIMS, Ranchi", daysAgo: 95, fundingGoal: 90000, fundingPledged: 90000, fundingUsed: 97500, fundingPartner: "Plateau Health Foundation", expenses: [
+  { id: 10, caseNo: "JH-URB-1051", category: "Urban Development", district: "Bokaro", title: "No street lighting for a kilometre", description: "There is no street lighting for almost a kilometre on the main road connecting the residential colony to the market area, and residents avoid walking that stretch after dark because of safety concerns. Two minor two-wheeler accidents have been reported on the unlit stretch over the past six months, both attributed partly to poor visibility at night. Women commuting home from work or evening tuition classes now arrange group walks or paid transport instead of covering the short distance alone. The ward councillor has acknowledged the gap but has cited pending budget approval for new poles and wiring before work can start.", summary: "No street lighting for almost a kilometre; residents avoid walking after dark.", votes: 15, status: "Logged", matchedFaculty: null, daysAgo: 4, fundingGoal: 0, fundingPledged: 0 },
+  { id: 11, caseNo: "JH-ACC-1052", category: "Accessibility", district: "Hazaribagh", title: "Block office has no ramp", description: "The block office has no ramp, so wheelchair users and elderly visitors are carried up the single flight of stairs by strangers or family members for every single visit, including routine paperwork like pension renewals. The building was constructed over a decade ago, before accessibility norms were as strictly enforced, and no retrofit has been carried out since. At least two disabled residents in the area say they now avoid the office altogether because of the physical difficulty, delaying their access to government schemes they are otherwise entitled to. A simple ramp and handrail installation could restore access for an estimated fifteen to twenty differently-abled residents who regularly need the office's services.", summary: "Block office has no ramp, so wheelchair users are carried up the stairs on every visit.", votes: 12, status: "Logged", matchedFaculty: null, daysAgo: 8, fundingGoal: 0, fundingPledged: 0 },
+  { id: 12, caseNo: "JH-LVH-1053", category: "Rural Livelihoods", district: "Dumka", title: "Artisans have no market beyond the haat", description: "Handicraft artisans have no market beyond the weekly haat, and most of their work — including bamboo craft and traditional textile weaving — sells for a fraction of its real worth to local traders who resell it at a significant markup in nearby towns. Around forty artisan households in the area rely on this craft as a secondary income source alongside farming, but the lack of direct market access or branding keeps their earnings consistently low. Several artisans have expressed interest in an online marketplace or an exhibition stall at district fairs but lack the resources or guidance to set one up on their own. Better market linkage could meaningfully raise household income without requiring any change to their existing craft practice.", summary: "Artisans have no market beyond the weekly haat and sell work for a fraction of its worth.", votes: 29, status: "Assigned to University", matchedFaculty: "Dr. P. Hansda · XISS, Ranchi", daysAgo: 45, fundingGoal: 0, fundingPledged: 0 },
+  { id: 13, caseNo: "JH-LVH-1054", category: "Rural Livelihoods", district: "Khunti", title: "Lac cultivators use decades-old methods", description: "Lac cultivators still rely on decades-old processing methods passed down through generations, which cuts deeply into both yield and quality compared to lac produced in neighbouring states using more modern extraction techniques. The traditional method results in higher wastage during the scraping and washing stages, and cultivators have no access to updated equipment or training on improved practices. Roughly sixty households in the surrounding villages depend on lac cultivation as a primary or secondary income source, particularly during the lean agricultural season. Introducing modern processing techniques and basic quality-testing equipment could substantially improve both yield and market price for these local cultivators.", summary: "Lac cultivators still use decades-old methods, cutting into yield and quality.", votes: 17, status: "Logged", matchedFaculty: null, daysAgo: 11, fundingGoal: 0, fundingPledged: 0 },
+  { id: 14, caseNo: "JH-ADM-1055", category: "Public Administration", district: "Godda", title: "Caste certificate pending six months", description: "Caste certificate applications have been pending for over six months with no update on status available to the applicant, despite the official processing timeline stating a maximum of thirty days. Several applicants, including students who need the certificate for scholarship or college admission purposes, have visited the block office multiple times only to be told the file is 'under verification' with no further detail offered. The lack of an online tracking system means applicants have no way to check progress remotely, forcing repeated in-person visits that cost daily-wage earners a full day's income each time. At least a dozen similarly delayed applications have been reported from the same block over the past year.", summary: "Caste certificate applications pending over six months with no status update.", votes: 34, status: "Logged", matchedFaculty: null, daysAgo: 20, fundingGoal: 0, fundingPledged: 0 },
+  { id: 15, caseNo: "JH-WTR-1056", category: "Water", district: "Sahibganj", title: "Arsenic levels above safe limits", description: "Groundwater tests conducted by a district health team show arsenic levels above safe limits in three hamlets, but no alternative water source has been provided to residents yet despite the results being shared with the block office over four months ago. Long-term consumption of arsenic-contaminated water carries serious health risks, and a few residents have already reported skin lesions consistent with early-stage arsenic exposure. The affected hamlets currently have no functioning water treatment or filtration system in place, and the nearest confirmed-safe handpump is over a kilometre away. Community health workers have recommended urgent installation of arsenic-removal units or a piped connection from an unaffected source.", summary: "Groundwater tests show arsenic above safe limits; no alternative water source provided yet.", votes: 21, status: "Logged", matchedFaculty: null, daysAgo: 13, fundingGoal: 0, fundingPledged: 0 },
+  { id: 16, caseNo: "JH-EDU-1057", category: "Education", district: "Latehar", title: "School roof collapsed after monsoon", description: "The school building roof partially collapsed after heavy monsoon rains this year, damaging two classrooms and forcing all classes to run in the open courtyard without any shelter from sun or rain. Roughly one hundred and eighty students across the primary and middle school sections are affected, and several parents have raised safety concerns about continuing classes outdoors through the rest of the monsoon season. The building, constructed over twenty-five years ago, has not undergone any structural inspection or maintenance in recent memory. Teachers have improvised with tarpaulin sheets to keep lessons going, but the arrangement is not sustainable once the rains intensify further.", summary: "School roof partially collapsed after monsoon rains; classes now run in the open courtyard.", votes: 25, status: "Logged", matchedFaculty: null, daysAgo: 17, fundingGoal: 0, fundingPledged: 0 },
+  { id: 17, caseNo: "JH-HLT-1058", category: "Healthcare", district: "Palamu", title: "Anganwadi centres out of nutrition supplies", description: "Anganwadi centres across this block have lacked basic nutrition supplies for three consecutive months, and routine malnutrition checks for children under five have stopped entirely because of the shortage. Around eight anganwadi centres serving over three hundred children are affected, and several frontline workers report that pregnant and lactating mothers have also missed their supplementary nutrition rations during this period. The supply chain disruption has been attributed to delayed fund transfers from the district office, though the exact cause remains unclear to workers on the ground. Continued gaps in monitoring raise the risk of undetected malnutrition cases going untreated through a crucial early-childhood window.", summary: "Anganwadi centres out of nutrition supplies for three months; malnutrition checks have stopped.", votes: 33, status: "Piloting", matchedFaculty: "Dr. M. Toppo · RIMS, Ranchi", daysAgo: 95, fundingGoal: 90000, fundingPledged: 90000, fundingUsed: 97500, fundingPartner: "Plateau Health Foundation", expenses: [
     { id: "e17-1", amount: 45000, note: "Nutrition supply restocking, 6 centres", by: "Dr. M. Toppo", at: 1 },
     { id: "e17-2", amount: 38000, note: "Cold-chain storage unit", by: "Dr. M. Toppo", at: 2 },
     { id: "e17-3", amount: 14500, note: "Field monitoring visits", by: "Dr. M. Toppo", at: 3 },
   ] },
-  { id: 18, caseNo: "JH-NRG-1059", category: "Energy", district: "Giridih", title: "Transformer down for three weeks", description: "A blown transformer has been down for three weeks, leaving two hamlets without any grid power ahead of the exam season.", votes: 9, status: "Logged", matchedFaculty: null, daysAgo: 3, fundingGoal: 0, fundingPledged: 0 },
+  { id: 18, caseNo: "JH-NRG-1059", category: "Energy", district: "Giridih", title: "Transformer down for three weeks", description: "A blown transformer has been down for three weeks, leaving two hamlets without any grid power ahead of the exam season, forcing students preparing for board exams to study by kerosene lamp or mobile phone flashlight after sunset. The local electricity department has cited a shortage of replacement transformers in district stock as the reason for the delay, with no confirmed repair date given so far. Small households running refrigerators for medicine storage have also been affected, and one family reported spoiled insulin because of the prolonged outage. Residents have escalated the complaint through the block-level grievance cell but have not yet received a written response.", summary: "Blown transformer down for three weeks, leaving two hamlets without grid power.", votes: 9, status: "Logged", matchedFaculty: null, daysAgo: 3, fundingGoal: 0, fundingPledged: 0 },
 ];
 
 const DUPLICATE_SAMPLE = {
@@ -469,6 +469,19 @@ const VOICE_SAMPLE = {
 };
 
 const STOPWORDS = new Set(["this", "that", "with", "from", "have", "were", "been", "into", "their", "there", "which", "about", "after", "before", "during", "over", "under", "more", "than", "they", "them", "also", "near", "only", "very", "some", "many", "most", "without", "still", "every", "single", "entire", "already"]);
+
+/* Card views show a short, scannable summary; the full description is reserved for the
+   "View details" popup. Seeded cases carry a hand-written `summary`; new citizen-submitted
+   cases fall back to this auto-generated one-liner. */
+function shortSummary(text, maxLen = 110) {
+  if (!text) return "";
+  const firstSentence = text.split(/(?<=[.!?])\s/)[0];
+  if (firstSentence.length <= maxLen) return firstSentence;
+  return text.slice(0, maxLen).trim() + "…";
+}
+function cardSummary(p) {
+  return p.summary || shortSummary(p.description);
+}
 
 function tokenize(text) {
   return (text || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 3 && !STOPWORDS.has(w));
@@ -859,7 +872,7 @@ function ScopeBanner({ user }) {
   );
 }
 
-function FullCaseCard({ p, highlightId, onOpenMatch }) {
+function FullCaseCard({ p, highlightId, onOpenMatch, onOpenDetails }) {
   const { t } = useLanguage();
   return (
     <div
@@ -871,7 +884,7 @@ function FullCaseCard({ p, highlightId, onOpenMatch }) {
         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ color: COLORS.inkSoft, background: COLORS.paperDark }}>{p.status}</span>
       </div>
       <div className="mt-2 font-medium text-sm" style={{ color: COLORS.ink }}>{p.title}</div>
-      <p className="text-xs mt-1 leading-relaxed" style={{ color: COLORS.inkSoft }}>{p.description}</p>
+      <p className="text-xs mt-1 leading-relaxed" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
       <div className="flex items-center gap-2 mt-3 flex-wrap">
         <CategoryBadge category={p.category} small />
         <span className="flex items-center gap-1 text-[11px]" style={{ color: COLORS.inkSoft }}><MapPin size={11} />{p.district}</span>
@@ -881,9 +894,14 @@ function FullCaseCard({ p, highlightId, onOpenMatch }) {
       <div className="mt-3">
         <UrgencyMeter problem={p} />
       </div>
-      <button onClick={() => onOpenMatch(p.id)} className="mt-3 flex items-center gap-1 text-xs font-medium" style={{ color: COLORS.slate }}>
-        {p.matchedFaculty ? `${t("matched")}: ${p.matchedFaculty}` : t("findFaculty")} <ArrowRight size={12} />
-      </button>
+      <div className="flex items-center gap-4 mt-3 flex-wrap">
+        <button onClick={() => onOpenDetails(p.id)} className="flex items-center gap-1 text-xs font-medium" style={{ color: COLORS.rustDark }}>
+          View details <ArrowRight size={12} />
+        </button>
+        <button onClick={() => onOpenMatch(p.id)} className="flex items-center gap-1 text-xs font-medium" style={{ color: COLORS.slate }}>
+          {p.matchedFaculty ? `${t("matched")}: ${p.matchedFaculty}` : t("findFaculty")} <ArrowRight size={12} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -908,7 +926,7 @@ function RedactedCaseCard({ p }) {
   );
 }
 
-function ClustersTab({ problems, user, highlightId, onOpenMatch, filter, setFilter }) {
+function ClustersTab({ problems, user, highlightId, onOpenMatch, onOpenDetails, filter, setFilter }) {
   const { t, language } = useLanguage();
   const [sortBy, setSortBy] = useState("urgent");
   const isCitizen = user?.role === "Citizen";
@@ -963,7 +981,7 @@ function ClustersTab({ problems, user, highlightId, onOpenMatch, filter, setFilt
                 <span className="text-xs font-mono uppercase tracking-wide" style={{ color: COLORS.forest }}>{t("myReports")}</span>
               </div>
               <div className="grid sm:grid-cols-2 gap-3">
-                {mine.map((p) => <FullCaseCard key={p.id} p={p} highlightId={highlightId} onOpenMatch={onOpenMatch} />)}
+                {mine.map((p) => <FullCaseCard key={p.id} p={p} highlightId={highlightId} onOpenMatch={onOpenMatch} onOpenDetails={onOpenDetails} />)}
               </div>
             </div>
           )}
@@ -977,14 +995,14 @@ function ClustersTab({ problems, user, highlightId, onOpenMatch, filter, setFilt
         </>
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
-          {filtered.map((p) => <FullCaseCard key={p.id} p={p} highlightId={highlightId} onOpenMatch={onOpenMatch} />)}
+          {filtered.map((p) => <FullCaseCard key={p.id} p={p} highlightId={highlightId} onOpenMatch={onOpenMatch} onOpenDetails={onOpenDetails} />)}
         </div>
       )}
     </div>
   );
 }
 
-function MatchTab({ problems: rawProblems, user, selectedId, setSelectedId, onAssign }) {
+function MatchTab({ problems: rawProblems, user, selectedId, setSelectedId, onAssign, onOpenDetails }) {
   const { t } = useLanguage();
   const problems = useMemo(() => scopeProblems(rawProblems, user), [rawProblems, user]);
   const selected = problems.find((p) => p.id === selectedId) || problems[0];
@@ -1018,12 +1036,19 @@ function MatchTab({ problems: rawProblems, user, selectedId, setSelectedId, onAs
         {selected && (
           <>
             <div className="rounded-lg p-4 mb-4" style={{ background: COLORS.paperDark, border: `1px solid ${COLORS.line}` }}>
-              <div className="flex items-center gap-2 flex-wrap">
-                <CaseStamp>{selected.caseNo}</CaseStamp>
-                <CategoryBadge category={selected.category} />
-                <span className="text-xs flex items-center gap-1" style={{ color: COLORS.inkSoft }}><MapPin size={11} />{selected.district}</span>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <CaseStamp>{selected.caseNo}</CaseStamp>
+                  <CategoryBadge category={selected.category} />
+                  <span className="text-xs flex items-center gap-1" style={{ color: COLORS.inkSoft }}><MapPin size={11} />{selected.district}</span>
+                </div>
+                {onOpenDetails && (
+                  <button onClick={() => onOpenDetails(selected.id)} className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: COLORS.rustDark }}>
+                    View details <ArrowRight size={12} />
+                  </button>
+                )}
               </div>
-              <p className="text-sm mt-2" style={{ color: COLORS.ink }}>{selected.description}</p>
+              <p className="text-sm mt-2" style={{ color: COLORS.ink }}>{cardSummary(selected)}</p>
               {selected.matchedFaculty && (
                 <div className="text-xs mt-2 flex items-center gap-1" style={{ color: COLORS.forest }}><CheckCircle2 size={13} /> {t("currentlyAssigned")} {selected.matchedFaculty}</div>
               )}
@@ -1073,7 +1098,7 @@ function MatchTab({ problems: rawProblems, user, selectedId, setSelectedId, onAs
   );
 }
 
-function JharkhandMap({ problems }) {
+function JharkhandMap({ problems, onOpenDetails }) {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
 
   const stats = useMemo(() => {
@@ -1163,7 +1188,13 @@ function JharkhandMap({ problems }) {
               <div className="space-y-1.5">
                 {problems.filter((p) => p.district === selectedDistrict).slice(0, 4).map((p) => (
                   <div key={p.id} className="text-[11px] leading-snug" style={{ color: COLORS.inkSoft }}>
-                    <CaseStamp>{p.caseNo}</CaseStamp> <span className="ml-1">{p.title}</span>
+                    <CaseStamp>{p.caseNo}</CaseStamp> <span className="ml-1 font-medium" style={{ color: COLORS.ink }}>{p.title}</span>
+                    <p className="mt-0.5" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
+                    {onOpenDetails && (
+                      <button onClick={() => onOpenDetails(p.id)} className="mt-0.5 font-medium flex items-center gap-0.5" style={{ color: COLORS.rustDark }}>
+                        View details <ArrowRight size={9} />
+                      </button>
+                    )}
                   </div>
                 ))}
                 {selectedStats.count === 0 && <div className="text-[11px] italic" style={{ color: COLORS.inkSoft }}>No cases reported here yet.</div>}
@@ -1183,7 +1214,7 @@ function JharkhandMap({ problems }) {
   );
 }
 
-function DashboardTab({ problems }) {
+function DashboardTab({ problems, onOpenDetails }) {
   const categoryData = useMemo(() => Object.keys(CATEGORIES).map((cat) => ({ name: cat, count: problems.filter((p) => p.category === cat).length, color: CATEGORIES[cat].color })).filter((d) => d.count > 0).sort((a, b) => b.count - a.count), [problems]);
   const sdgData = useMemo(() => {
     const map = {};
@@ -1238,7 +1269,11 @@ function DashboardTab({ problems }) {
                     <CategoryBadge category={p.category} small />
                     <span className="text-[11px] flex items-center gap-1" style={{ color: COLORS.inkSoft }}><MapPin size={10} />{p.district}</span>
                   </div>
-                  <div className="text-xs mt-1 truncate" style={{ color: COLORS.ink }}>{p.title}</div>
+                  <div className="text-xs mt-1 font-medium" style={{ color: COLORS.ink }}>{p.title}</div>
+                  <p className="text-[11px] mt-0.5 leading-snug" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
+                  <button onClick={() => onOpenDetails(p.id)} className="text-[11px] mt-1 font-medium flex items-center gap-0.5" style={{ color: COLORS.rustDark }}>
+                    View details <ArrowRight size={10} />
+                  </button>
                 </div>
                 <div className="w-28 shrink-0">
                   <div className="text-[11px] font-mono font-semibold text-right" style={{ color: uColor }}>
@@ -1289,7 +1324,7 @@ function DashboardTab({ problems }) {
       </div>
 
       <div className="mb-6">
-        <JharkhandMap problems={problems} />
+        <JharkhandMap problems={problems} onOpenDetails={onOpenDetails} />
       </div>
 
       <div className="rounded-lg p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_SM }}>
@@ -1307,7 +1342,7 @@ function DashboardTab({ problems }) {
         </div>
       </div>
 
-      <FacultyRoster problems={problems} />
+      <FacultyRoster problems={problems} onOpenDetails={onOpenDetails} />
       <PartnerDirectory problems={problems} />
     </div>
   );
@@ -1315,7 +1350,7 @@ function DashboardTab({ problems }) {
 
 /* Every faculty member across every partner university, and exactly which cases each one is
    currently handling — the oversight view a government official needs, in one place. */
-function FacultyRoster({ problems }) {
+function FacultyRoster({ problems, onOpenDetails }) {
   const roster = useMemo(
     () =>
       FACULTY.map((f) => {
@@ -1357,10 +1392,18 @@ function FacultyRoster({ problems }) {
             {f.assigned.length > 0 ? (
               <div className="mt-2.5 flex flex-col gap-1.5">
                 {f.assigned.map((p) => (
-                  <div key={p.id} className="flex items-center gap-2 flex-wrap text-[11px]" style={{ color: COLORS.inkSoft }}>
-                    <CaseStamp>{p.caseNo}</CaseStamp>
-                    <span className="truncate" style={{ color: COLORS.ink }}>{p.title}</span>
-                    <span className="ml-auto font-mono px-1.5 py-0.5 rounded" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}` }}>{p.status}</span>
+                  <div key={p.id} className="text-[11px]" style={{ color: COLORS.inkSoft }}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <CaseStamp>{p.caseNo}</CaseStamp>
+                      <span className="truncate font-medium" style={{ color: COLORS.ink }}>{p.title}</span>
+                      <span className="ml-auto font-mono px-1.5 py-0.5 rounded" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}` }}>{p.status}</span>
+                    </div>
+                    <p className="mt-0.5" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
+                    {onOpenDetails && (
+                      <button onClick={() => onOpenDetails(p.id)} className="mt-0.5 font-medium flex items-center gap-0.5" style={{ color: COLORS.rustDark }}>
+                        View details <ArrowRight size={9} />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1635,7 +1678,7 @@ function LoginScreen({ onLogin }) {
   );
 }
 
-function LifecycleTab({ problems: rawProblems, user, onAdvance, onPledge, onLogExpense, onGoToMatch }) {
+function LifecycleTab({ problems: rawProblems, user, onAdvance, onPledge, onLogExpense, onGoToMatch, onOpenDetails }) {
   const { t } = useLanguage();
   const problems = useMemo(() => scopeProblems(rawProblems, user), [rawProblems, user]);
   const userRole = user?.role;
@@ -1667,6 +1710,10 @@ function LifecycleTab({ problems: rawProblems, user, onAdvance, onPledge, onLogE
                         </span>
                       </div>
                       <div className="text-xs font-medium mt-1.5" style={{ color: COLORS.ink }}>{p.title}</div>
+                      <p className="text-[11px] mt-1 leading-snug" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
+                      <button onClick={() => onOpenDetails(p.id)} className="text-[11px] mt-1 font-medium flex items-center gap-0.5" style={{ color: COLORS.rustDark }}>
+                        View details <ArrowRight size={10} />
+                      </button>
                       <div className="text-[11px] mt-1 flex items-center gap-1" style={{ color: COLORS.inkSoft }}><MapPin size={10} />{p.district}</div>
                       {p.matchedFaculty && (
                         <div className="text-[11px] mt-1 flex items-center gap-1 flex-wrap" style={{ color: COLORS.inkSoft }}>
@@ -1811,6 +1858,86 @@ function FundsPanel({ problem: p, user, onLogExpense }) {
   );
 }
 
+/* Full-detail popup for a single case — the "View details" action available wherever a
+   case is listed, giving the same depth of information as the Faculty Match detail panel. */
+function CaseDetailModal({ problem: p, onClose, onOpenMatch }) {
+  const { t } = useLanguage();
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, []);
+  if (!p) return null;
+  const info = urgencyInfo(p);
+  const uColor = urgencyColor(info.pct, info.resolved);
+  const facultyGeo = p.matchedFaculty ? facultyGeoFor(p.matchedFaculty) : null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0" onClick={onClose} style={{ background: "rgba(32,40,31,0.48)", backdropFilter: "blur(4px)" }} />
+      <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl p-5 sm:p-6" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_LG }}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <CaseStamp>{p.caseNo}</CaseStamp>
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ color: COLORS.inkSoft, background: COLORS.paperDark }}>{p.status}</span>
+          </div>
+          <button onClick={onClose} aria-label={t("close")} className="p-1.5 rounded-full shrink-0" style={{ color: COLORS.inkSoft }}><X size={17} /></button>
+        </div>
+
+        <h2 className="font-display text-xl mt-3" style={{ color: COLORS.ink }}>{p.title}</h2>
+        <p className="text-sm mt-2 leading-relaxed" style={{ color: COLORS.inkSoft }}>{p.description}</p>
+
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <CategoryBadge category={p.category} />
+          <span className="flex items-center gap-1 text-xs" style={{ color: COLORS.inkSoft }}><MapPin size={12} />{p.district}</span>
+          <span className="flex items-center gap-1 text-xs font-mono" style={{ color: COLORS.rustDark }}><Users size={12} />{p.votes} {t("citizensReported")}</span>
+        </div>
+        {p.reportedBy && <div className="text-xs mt-2 italic" style={{ color: COLORS.inkSoft }}>Filed by {p.reportedBy}</div>}
+        {CATEGORIES[p.category]?.sdg && <div className="text-xs mt-1" style={{ color: COLORS.inkSoft }}>{CATEGORIES[p.category].sdg}</div>}
+
+        <div className="mt-4 rounded-lg p-3" style={{ background: COLORS.paperDark, border: `1px solid ${COLORS.line}` }}>
+          <div className="text-[11px] font-mono uppercase tracking-wide mb-1.5" style={{ color: COLORS.inkSoft }}>Deadline status</div>
+          <div className="flex justify-between text-xs mb-1">
+            <span style={{ color: COLORS.inkSoft }}>{info.resolved ? t("onTarget") : info.pct >= 100 ? `Overdue ${info.overdueDays}d` : `${info.pct}% of ${info.slaDays}d target`}</span>
+          </div>
+          <ScoreBar pct={Math.min(100, info.pct)} color={uColor} />
+        </div>
+
+        {p.matchedFaculty ? (
+          <div className="mt-3 rounded-lg p-3" style={{ background: COLORS.slate + "0F", border: `1px solid ${COLORS.slate}33` }}>
+            <div className="text-[11px] font-mono uppercase tracking-wide mb-1" style={{ color: COLORS.inkSoft }}>{t("matched")}</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <GraduationCap size={14} style={{ color: COLORS.slate }} />
+              <span className="text-sm font-medium" style={{ color: COLORS.ink }}>{p.matchedFaculty}</span>
+            </div>
+            {facultyGeo && <div className="mt-1.5"><DirectionsLink geo={facultyGeo.geo} label="Directions to campus" /></div>}
+          </div>
+        ) : (
+          <div className="mt-3 text-xs italic" style={{ color: COLORS.inkSoft }}>No faculty assigned yet.</div>
+        )}
+
+        {p.fundingGoal > 0 && (
+          <div className="mt-3 rounded-lg p-3" style={{ background: COLORS.gold + "0F", border: `1px solid ${COLORS.gold}44` }}>
+            <div className="text-[11px] font-mono uppercase tracking-wide mb-1.5" style={{ color: COLORS.inkSoft }}>Funding</div>
+            <div className="flex justify-between text-xs mb-1" style={{ color: COLORS.inkSoft }}>
+              <span>₹{(p.fundingUsed || 0).toLocaleString("en-IN")} used</span>
+              <span>of ₹{p.fundingPledged.toLocaleString("en-IN")} pledged (goal ₹{p.fundingGoal.toLocaleString("en-IN")})</span>
+            </div>
+            <ScoreBar pct={p.fundingPledged > 0 ? Math.min(100, ((p.fundingUsed || 0) / p.fundingPledged) * 100) : 0} color={COLORS.gold} />
+            {p.fundingPartner && <div className="text-[11px] mt-1.5" style={{ color: COLORS.inkSoft }}>Funded by {p.fundingPartner}</div>}
+          </div>
+        )}
+
+        {onOpenMatch && (
+          <button onClick={() => { onOpenMatch(p.id); onClose(); }} className="w-full mt-4 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5"
+            style={{ background: `linear-gradient(135deg, ${COLORS.rust}, ${COLORS.rustDark})`, color: COLORS.white, boxShadow: SHADOW_MD }}>
+            {t("findFaculty")} <ArrowRight size={14} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ---------------------------------- app ---------------------------------- */
 function AppContent() {
   const { language, setLanguage, t } = useLanguage();
@@ -1825,6 +1952,7 @@ function AppContent() {
   const [micUnsupported, setMicUnsupported] = useState(false);
   const [highlightId, setHighlightId] = useState(null);
   const [selectedId, setSelectedId] = useState(SEED[4].id);
+  const [detailCaseId, setDetailCaseId] = useState(null);
   const [filter, setFilter] = useState("All");
   const [toast, setToast] = useState(null);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -2012,6 +2140,9 @@ function AppContent() {
     setPhotoAttached(false);
     setTab("clusters");
   }
+  function handleOpenDetails(id) {
+    setDetailCaseId(id);
+  }
   function handleOpenMatch(id) {
     if (user && !ROLE_META[user.role].tabs.includes("match")) {
       showToast("Faculty matching is visible to university faculty and government accounts.");
@@ -2087,7 +2218,6 @@ function AppContent() {
               <div className="flex items-center justify-between flex-wrap gap-y-2 gap-x-4">
                 <span className="text-[11px] font-mono uppercase tracking-widest" style={{ color: COLORS.inkSoft }}>{t("department")}</span>
                 <div className="flex items-center flex-wrap gap-2">
-                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-full" style={{ background: COLORS.rust + "1A", color: COLORS.rustDark, border: `1px solid ${COLORS.rust}55` }}>SIH 2026 · Interactive Prototype</span>
                   <span className="flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full" style={{ background: COLORS.slate + "14", color: COLORS.slate, border: `1px solid ${COLORS.slate}44` }}>
                     <User size={11} /> {user.name} · {ROLE_META[user.role].label}
                   </span>
@@ -2180,18 +2310,26 @@ function AppContent() {
                 />
               )}
               {tab === "clusters" && (
-                <ClustersTab problems={problems} user={user} highlightId={highlightId} onOpenMatch={handleOpenMatch} filter={filter} setFilter={setFilter} />
+                <ClustersTab problems={problems} user={user} highlightId={highlightId} onOpenMatch={handleOpenMatch} onOpenDetails={handleOpenDetails} filter={filter} setFilter={setFilter} />
               )}
               {tab === "match" && (
-                <MatchTab problems={problems} user={user} selectedId={selectedId} setSelectedId={setSelectedId} onAssign={handleAssign} />
+                <MatchTab problems={problems} user={user} selectedId={selectedId} setSelectedId={setSelectedId} onAssign={handleAssign} onOpenDetails={handleOpenDetails} />
               )}
-              {tab === "dashboard" && <DashboardTab problems={problems} />}
+              {tab === "dashboard" && <DashboardTab problems={problems} onOpenDetails={handleOpenDetails} />}
               {tab === "lifecycle" && (
-                <LifecycleTab problems={problems} user={user} onAdvance={handleAdvance} onPledge={handlePledge} onLogExpense={handleLogExpense} onGoToMatch={handleOpenMatch} />
+                <LifecycleTab problems={problems} user={user} onAdvance={handleAdvance} onPledge={handlePledge} onLogExpense={handleLogExpense} onGoToMatch={handleOpenMatch} onOpenDetails={handleOpenDetails} />
               )}
             </div>
           </main>
         </>
+      )}
+
+      {detailCaseId && (
+        <CaseDetailModal
+          problem={problems.find((p) => p.id === detailCaseId)}
+          onClose={() => setDetailCaseId(null)}
+          onOpenMatch={handleOpenMatch}
+        />
       )}
 
       {toast && (
