@@ -467,6 +467,14 @@ const VOICE_SAMPLE = {
   description: "The wooden footbridge near the market has broken planks and no railing, and villagers risk the crossing every single morning to reach the other side.",
   district: "Simdega",
 };
+/* SIH demo scenario: citizen → university → industry → government, end-to-end.
+   Kept in a different district from the seeded elephant case (JH-AGR-1045, West Singhbhum)
+   so the duplicate-detection engine treats it as a genuinely new case, not a merge. */
+const ELEPHANT_CONFLICT_SAMPLE = {
+  title: "Elephants entering villages damage crops and endanger lives",
+  description: "Every year, elephants enter villages and agricultural areas in our region, damaging crops, destroying property and sometimes causing loss of human lives. The problem is recurring, and existing responses are mostly reactive. Communities need an early warning and long-term solution to reduce conflict while also protecting wildlife.",
+  district: "Saraikela Kharsawan",
+};
 
 const STOPWORDS = new Set(["this", "that", "with", "from", "have", "were", "been", "into", "their", "there", "which", "about", "after", "before", "during", "over", "under", "more", "than", "they", "them", "also", "near", "only", "very", "some", "many", "most", "without", "still", "every", "single", "entire", "already"]);
 
@@ -666,12 +674,15 @@ function SubmitTab({
         <h2 className="font-display text-xl" style={{ color: COLORS.ink }}>{t("reportChallenge")}</h2>
         <p className="text-sm mt-1" style={{ color: COLORS.inkSoft }}>{t("reportIntro")}</p>
 
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-2 mt-4 flex-wrap">
           <button onClick={() => onQuickFill(DUPLICATE_SAMPLE)} className="text-xs font-mono px-3 py-1.5 rounded border" style={{ borderColor: COLORS.rust + "80", color: COLORS.rustDark, background: COLORS.rust + "0F" }}>
             <Wand2 size={12} className="inline mr-1 -mt-0.5" />{t("tryDuplicate")}
           </button>
           <button onClick={() => onQuickFill(NEW_SAMPLE)} className="text-xs font-mono px-3 py-1.5 rounded border" style={{ borderColor: COLORS.forest + "80", color: COLORS.forest, background: COLORS.forest + "0F" }}>
             <FileSearch size={12} className="inline mr-1 -mt-0.5" />{t("tryFresh")}
+          </button>
+          <button onClick={() => onQuickFill(ELEPHANT_CONFLICT_SAMPLE)} className="text-xs font-mono px-3 py-1.5 rounded border" style={{ borderColor: COLORS.violet + "80", color: COLORS.violet, background: COLORS.violet + "0F" }}>
+            <Sparkles size={12} className="inline mr-1 -mt-0.5" />Demo: Elephant conflict
           </button>
         </div>
 
