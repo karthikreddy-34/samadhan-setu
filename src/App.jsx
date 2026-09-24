@@ -21,6 +21,10 @@ const COLORS = {
   forest: "#2F5D45",
   forestSoft: "#4C7A60",
   gold: "#B98B2E",
+  // Darker than `gold` — used for text/icons on light backgrounds. Plain `gold` on
+  // `card`/`paper` measures ~2.9:1 contrast (fails WCAG AA's 4.5:1 for text and 3:1
+  // for icons); this variant measures ~4.6:1 and passes while keeping the same hue.
+  goldDark: "#8A6420",
   slate: "#33475A",
   maroon: "#8E3B46",
   violet: "#6B4C8A",
@@ -319,7 +323,7 @@ function LanguageModal({ open, language, setLanguage, onClose, loginMode = false
 /* ---------------------------------- domain data ---------------------------------- */
 const CATEGORIES = {
   Water: { color: COLORS.slate, sdg: "SDG 6 · Clean Water", keywords: ["handpump", "groundwater", "borewell", "drinking water", "arsenic", "water treatment", "pond", "well is dry", "water"] },
-  Education: { color: COLORS.gold, sdg: "SDG 4 · Quality Education", keywords: ["teacher", "school", "classroom", "syllabus", "board exam", "science teacher", "students"] },
+  Education: { color: COLORS.goldDark, sdg: "SDG 4 · Quality Education", keywords: ["teacher", "school", "classroom", "syllabus", "board exam", "science teacher", "students"] },
   Healthcare: { color: COLORS.maroon, sdg: "SDG 3 · Good Health", keywords: ["doctor", "sub-health centre", "clinic", "maternal", "anganwadi", "nutrition", "hospital", "pregnant"] },
   Agriculture: { color: COLORS.forest, sdg: "SDG 2 · Zero Hunger", keywords: ["crop", "paddy", "elephant", "cold storage", "harvest", "irrigation", "tomato", "farmer"] },
   Environment: { color: COLORS.forestSoft, sdg: "SDG 15 · Life on Land", keywords: ["mining", "river", "pollution", "deforestation", "sal forest", "spring", "contamination"] },
@@ -714,7 +718,7 @@ function ScoreBar({ pct, color }) {
 function SubmitTab({
   form, setForm, isRecording, onVoice, onSubmit, onQuickFill,
   photoAttached, photoFile, photoPreviewUrl, onPhotoButtonClick, onPhotoSelected, onRemovePhoto, fileInputRef,
-  preview,
+  preview, errors = {}, honeypot = "", setHoneypot = () => {},
 }) {
   const { t, language } = useLanguage();
   return (
@@ -723,29 +727,47 @@ function SubmitTab({
         <h2 className="font-display text-xl" style={{ color: COLORS.ink }}>{t("reportChallenge")}</h2>
         <p className="text-sm mt-1" style={{ color: COLORS.inkSoft }}>{t("reportIntro")}</p>
 
-        <div className="flex gap-2 mt-4">
-          <button onClick={() => onQuickFill(DUPLICATE_SAMPLE)} className="text-xs font-mono px-3 py-1.5 rounded border" style={{ borderColor: COLORS.rust + "80", color: COLORS.rustDark, background: COLORS.rust + "0F" }}>
-            <Wand2 size={12} className="inline mr-1 -mt-0.5" />{t("tryDuplicate")}
+        {/* Demo-only shortcuts: kept visually secondary (plain text, no fill/border weight)
+            so "Log this case" below remains the one clear call to action on this screen. */}
+        <div className="flex gap-3 mt-4">
+          <button onClick={() => onQuickFill(DUPLICATE_SAMPLE)} className="text-xs font-mono underline underline-offset-2" style={{ color: COLORS.inkSoft }}>
+            <Wand2 size={12} className="inline mr-1 -mt-0.5" />Demo: {t("tryDuplicate")}
           </button>
-          <button onClick={() => onQuickFill(NEW_SAMPLE)} className="text-xs font-mono px-3 py-1.5 rounded border" style={{ borderColor: COLORS.forest + "80", color: COLORS.forest, background: COLORS.forest + "0F" }}>
-            <FileSearch size={12} className="inline mr-1 -mt-0.5" />{t("tryFresh")}
+          <button onClick={() => onQuickFill(NEW_SAMPLE)} className="text-xs font-mono underline underline-offset-2" style={{ color: COLORS.inkSoft }}>
+            <FileSearch size={12} className="inline mr-1 -mt-0.5" />Demo: {t("tryFresh")}
           </button>
         </div>
 
         <div className="mt-5 space-y-4">
+          {/* Honeypot: hidden from sighted and screen-reader users alike; a filled value
+              means an automated bot filled every field it could find. */}
+          <input
+            type="text"
+            name="website"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+          />
           <div>
-            <label className="text-xs font-mono uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>{t("title")}</label>
+            <label className="text-xs font-mono uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>{t("title")} <span style={{ color: COLORS.rust }}>*</span></label>
             <input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder={t("titlePlaceholder")}
+              required
+              aria-required="true"
+              aria-invalid={!!errors.title}
               className="w-full mt-1 px-3 py-2 rounded-md text-sm outline-none premium-input transition-shadow"
-              style={{ background: COLORS.white, border: `1px solid ${COLORS.line}`, color: COLORS.ink }}
+              style={{ background: COLORS.white, border: `1px solid ${errors.title ? COLORS.rust : COLORS.line}`, color: COLORS.ink }}
             />
+            {errors.title && <p className="text-[11px] mt-1" style={{ color: COLORS.rust }}>{errors.title}</p>}
           </div>
           <div>
             <div className="flex items-center justify-between">
-              <label className="text-xs font-mono uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>{t("description")}</label>
+              <label className="text-xs font-mono uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>{t("description")} <span style={{ color: COLORS.rust }}>*</span></label>
               <button
                 onClick={onVoice}
                 className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full"
@@ -759,9 +781,13 @@ function SubmitTab({
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder={t("descriptionPlaceholder")}
               rows={4}
+              required
+              aria-required="true"
+              aria-invalid={!!errors.description}
               className="w-full mt-1 px-3 py-2 rounded-md text-sm outline-none resize-none premium-input transition-shadow"
-              style={{ background: COLORS.white, border: `1px solid ${COLORS.line}`, color: COLORS.ink }}
+              style={{ background: COLORS.white, border: `1px solid ${errors.description ? COLORS.rust : COLORS.line}`, color: COLORS.ink }}
             />
+            {errors.description && <p className="text-[11px] mt-1" style={{ color: COLORS.rust }}>{errors.description}</p>}
             {isRecording && <div className="text-[11px] mt-1 font-mono" style={{ color: COLORS.rust }}>{t("transcribing")}</div>}
           </div>
           <div>
@@ -779,10 +805,12 @@ function SubmitTab({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-mono uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>{t("district")}</label>
+              <label className="text-xs font-mono uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>{t("district")} <span style={{ color: COLORS.rust }}>*</span></label>
               <select
                 value={form.district}
                 onChange={(e) => setForm({ ...form, district: e.target.value })}
+                required
+                aria-required="true"
                 className="w-full mt-1 px-3 py-2 rounded-md text-sm outline-none premium-input transition-shadow"
                 style={{ background: COLORS.white, border: `1px solid ${COLORS.line}`, color: COLORS.ink }}
               >
@@ -1461,7 +1489,7 @@ function PartnerDirectory({ problems }) {
   return (
     <div className="rounded-lg p-4 mt-6" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_SM }}>
       <div className="flex items-center gap-2 mb-1">
-        <Building2 size={15} style={{ color: COLORS.gold }} />
+        <Building2 size={15} style={{ color: COLORS.goldDark }} />
         <div className="text-sm font-medium" style={{ color: COLORS.ink }}>Industry & CSR partner directory</div>
       </div>
       <p className="text-xs mb-3" style={{ color: COLORS.inkSoft }}>Exact addresses for site visits, plus how much each partner has pledged versus how much universities have actually spent — so funding stays accountable.</p>
@@ -1572,6 +1600,17 @@ function LoginScreen({ onLogin }) {
   const [submitting, setSubmitting] = useState(false);
   const [shake, setShake] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(true);
+  // Brute-force / spam protection: after 5 wrong passwords, lock out further attempts
+  // for 30s rather than letting a script hammer the password field indefinitely.
+  const [failCount, setFailCount] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState(0);
+  const [lockTick, setLockTick] = useState(0);
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const id = setInterval(() => setLockTick((v) => v + 1), 1000);
+    return () => clearInterval(id);
+  }, [lockedUntil]);
+  const lockedSecondsLeft = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
 
   const unmetRules = passwordInput ? unmetPasswordRules(passwordInput) : PASSWORD_POLICY;
 
@@ -1600,6 +1639,10 @@ function LoginScreen({ onLogin }) {
   }
   async function trySubmit() {
     if (submitting) return;
+    if (Date.now() < lockedUntil) {
+      fail(`Too many attempts. Try again in ${Math.max(1, Math.ceil((lockedUntil - Date.now()) / 1000))}s.`);
+      return;
+    }
     const errs = {};
     if (!emailInput.trim()) errs.email = t("requiredField");
     else if (!EMAIL_RE.test(emailInput.trim())) errs.email = t("invalidEmail");
@@ -1620,10 +1663,19 @@ function LoginScreen({ onLogin }) {
     try {
       const hash = await hashPassword(passwordInput);
       if (hash === ROLE_META[pendingRole].passwordHash) {
+        setFailCount(0);
         onLogin(pendingRole, { email: emailInput.trim(), mobile: mobileInput.trim() });
       } else {
         setPasswordInput("");
-        fail(t("incorrectPassword"));
+        const nextCount = failCount + 1;
+        setFailCount(nextCount);
+        if (nextCount >= 5) {
+          setLockedUntil(Date.now() + 30000);
+          setFailCount(0);
+          fail("Too many attempts. Try again in 30s.");
+        } else {
+          fail(t("incorrectPassword"));
+        }
       }
     } finally {
       setSubmitting(false);
@@ -1638,7 +1690,64 @@ function LoginScreen({ onLogin }) {
   }[role]);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="login-page">
+      <style>{`
+        .login-page {
+          min-height: 100vh;
+          width: 100%;
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 72px 24px 40px;
+          position: relative;
+          overflow-x: hidden;
+          overflow-y: auto;
+          isolation: isolate;
+        }
+        .login-page *, .login-page *::before, .login-page *::after { box-sizing: border-box; }
+        .login-main {
+          position: relative;
+          z-index: 10;
+          width: 100%;
+          max-width: 920px;
+          margin: 0 auto;
+        }
+        .login-brand { text-align: center; margin: 0 auto 28px; }
+        .login-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
+          width: 100%;
+        }
+        .login-card {
+          display: block;
+          width: 100%;
+          min-width: 0;
+          text-align: left;
+          padding: 20px;
+          border-radius: 12px;
+          cursor: pointer;
+          font: inherit;
+          transition: transform 180ms ease, box-shadow 180ms ease;
+        }
+        .login-card:hover { transform: translateY(-3px); }
+        .login-card-header { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .login-icon { width: 36px; height: 36px; flex: 0 0 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .login-meta { min-width: 0; flex: 1; }
+        .login-role { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; line-height: 1.35; }
+        .login-demo { margin-top: 4px; font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; }
+        .login-desc { margin: 14px 0 0; font-size: 13px; line-height: 1.6; }
+        .login-scope { display: flex; align-items: flex-start; gap: 6px; margin-top: 12px; font-size: 11px; line-height: 1.5; }
+        .login-action { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 13px; font-weight: 600; }
+        .login-bottom-note { margin: 20px 0 0; text-align: center; font-size: 11px; }
+        @media (max-width: 760px) {
+          .login-page { align-items: flex-start; padding: 76px 14px 28px; }
+          .login-main { max-width: 560px; }
+          .login-grid { grid-template-columns: 1fr; gap: 12px; }
+          .login-card { padding: 16px; }
+        }
+      `}</style>
       <LoginBackground />
       <div className="absolute inset-0" style={{ background: COLORS.paper, opacity: 0.55 }} />
       <div className="absolute top-4 right-4 z-20">
@@ -1650,8 +1759,8 @@ function LoginScreen({ onLogin }) {
       <LanguageModal open={languageOpen} language={language} setLanguage={setLanguage}
         onClose={() => setLanguageOpen(false)} loginMode={true} />
 
-      <div className="w-full max-w-2xl relative z-10">
-        <div className="text-center mb-8">
+      <div className="login-main">
+        <div className="login-brand">
           <div className="flex justify-center mb-3" style={{ filter: `drop-shadow(0 4px 10px rgba(32,40,31,0.15))` }}>
             <Emblem size={52} />
           </div>
@@ -1665,24 +1774,24 @@ function LoginScreen({ onLogin }) {
 
         {!pendingRole ? (
           <>
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="login-grid">
               {Object.entries(ROLE_META).map(([role, meta]) => {
                 const Icon = meta.icon;
                 return (
-                  <button key={role} onClick={() => chooseRole(role)} className="text-left rounded-lg p-4 lift-hover"
+                  <button key={role} onClick={() => chooseRole(role)} className="login-card lift-hover"
                     style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_SM }}>
-                    <div className="flex items-center gap-2">
-                      <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: COLORS.rust + "1A", color: COLORS.rustDark }}>
+                    <div className="login-card-header">
+                      <span className="login-icon" style={{ background: COLORS.rust + "1A", color: COLORS.rustDark }}>
                         <Icon size={16} />
                       </span>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold flex items-center gap-1.5" style={{ color: COLORS.ink }}>
+                      <div className="login-meta">
+                        <div className="login-role" style={{ color: COLORS.ink }}>
                           {roleLabel(role)} <Lock size={11} style={{ color: COLORS.inkSoft }} />
                         </div>
-                        <div className="text-[11px] font-mono truncate" style={{ color: COLORS.inkSoft }}>{meta.demoName} · {meta.demoSub}</div>
+                        <div className="login-demo" style={{ color: COLORS.inkSoft }}>{meta.demoName} · {meta.demoSub}</div>
                       </div>
                     </div>
-                    <p className="text-xs mt-2.5 leading-relaxed" style={{ color: COLORS.inkSoft }}>
+                    <p className="login-desc" style={{ color: COLORS.inkSoft }}>
                       {language === "English" ? meta.desc : language === "Hindi" ? ({
                         Citizen:"समस्या दर्ज करें और देखें कि कितने लोग इसी समस्या से जुड़े हैं।", Faculty:"अपने शोध से जुड़ी समस्याओं की समीक्षा करें और उन्हें संभालें।", Industry:"प्रोटोटाइप में सहायता दें और समाधान की प्रगति देखें।", Government:"सभी रिपोर्ट, मिलान, फंडिंग और प्रगति की निगरानी करें।"
                       }[role]) : language === "Punjabi" ? ({
@@ -1691,18 +1800,18 @@ function LoginScreen({ onLogin }) {
                         Citizen:"समस्या दर्ज करो अर देखो कितने लोग इस समस्या तै जुड़े सैं।", Faculty:"अपणी रिसर्च तै जुड़ी समस्या देखो अर संभालो।", Industry:"प्रोटोटाइप में मदद करो अर समाधान की प्रगति देखो।", Government:"सारी रिपोर्ट, मिलान, फंडिंग अर प्रगति देखो।"
                       }[role])}
                     </p>
-                    <div className="text-[10px] mt-2 flex items-start gap-1" style={{ color: COLORS.slate }}>
+                    <div className="login-scope" style={{ color: COLORS.slate }}>
                       <ShieldCheck size={12} className="shrink-0 mt-[1px]" />
                       <span>{language === "English" ? meta.scopeNote : t("accessRole")}</span>
                     </div>
-                    <div className="text-xs mt-2.5 font-medium flex items-center gap-1" style={{ color: COLORS.rustDark }}>
+                    <div className="login-action" style={{ color: COLORS.rustDark }}>
                       {t("signInAs")} {meta.demoName.split(" ")[0]} <ArrowRight size={12} />
                     </div>
                   </button>
                 );
               })}
             </div>
-            <p className="text-[11px] text-center mt-5 font-mono" style={{ color: COLORS.inkSoft }}>{t("accessRole")}</p>
+            <p className="login-bottom-note" style={{ color: COLORS.inkSoft }}>{t("accessRole")}</p>
           </>
         ) : (
           <div className="max-w-sm mx-auto rounded-lg p-6"
@@ -1780,9 +1889,9 @@ function LoginScreen({ onLogin }) {
                   </label>
 
                   {error && <div className="text-[11px] mt-1.5 font-medium" style={{ color: COLORS.rust }}>{error}</div>}
-                  <button onClick={trySubmit} disabled={submitting} className="w-full mt-4 py-2.5 rounded-md text-sm font-semibold lift-hover disabled:opacity-60"
+                  <button onClick={trySubmit} disabled={submitting || lockedSecondsLeft > 0} className="w-full mt-4 py-2.5 rounded-md text-sm font-semibold lift-hover disabled:opacity-60"
                     style={{ background: `linear-gradient(135deg, ${COLORS.rust}, ${COLORS.rustDark})`, color: COLORS.white, boxShadow: SHADOW_MD }}>
-                    {submitting ? "…" : t("signIn")}
+                    {submitting ? "…" : lockedSecondsLeft > 0 ? `Try again in ${lockedSecondsLeft}s` : t("signIn")}
                   </button>
                   <button onClick={backToRoles} className="w-full mt-2 py-2 text-xs font-medium" style={{ color: COLORS.inkSoft }}>
                     {t("chooseDifferentRole")}
@@ -1875,7 +1984,7 @@ function LifecycleTab({ problems: rawProblems, user, onAdvance, onPledge, onLogE
                           <ScoreBar pct={Math.min(100, (p.fundingPledged / p.fundingGoal) * 100)} color={COLORS.gold} />
                           {p.fundingPledged < p.fundingGoal && (
                             ["Industry", "Government"].includes(userRole) ? (
-                              <button onClick={() => onPledge(p)} className="text-[11px] mt-1.5 font-medium flex items-center gap-1" style={{ color: COLORS.gold }}>
+                              <button onClick={() => onPledge(p)} className="text-[11px] mt-1.5 font-medium flex items-center gap-1" style={{ color: COLORS.goldDark }}>
                                 <Building2 size={11} /> Pledge support
                               </button>
                             ) : (
@@ -2048,6 +2157,13 @@ function AppContent() {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState(null);
   const [micUnsupported, setMicUnsupported] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  // Anti-spam: honeypot field bots tend to auto-fill, plus a minimum time-on-form
+  // before a submission is accepted (real citizens take more than a couple seconds
+  // to type a title and description).
+  const [honeypot, setHoneypot] = useState("");
+  const formOpenedAt = useRef(Date.now());
+  useEffect(() => { if (tab === "submit") formOpenedAt.current = Date.now(); }, [tab]);
   const [highlightId, setHighlightId] = useState(null);
   const [selectedId, setSelectedId] = useState(() => (loadPersistedProblems()[4] || loadPersistedProblems()[0])?.id ?? SEED[4].id);
   const [filter, setFilter] = useState("All");
@@ -2082,6 +2198,15 @@ function AppContent() {
   const [cookieChoice, setCookieChoice] = useState(() => {
     try { return localStorage.getItem(COOKIE_CONSENT_KEY) || null; } catch { return null; }
   });
+  // Analytics: only load Google Analytics after explicit cookie-banner acceptance, and
+  // rely on gtag's own consent-mode default (set in index.html) rather than firing
+  // pageviews before that consent exists.
+  useEffect(() => {
+    if (cookieChoice === "accepted" && typeof window.gtag === "function") {
+      window.gtag("consent", "update", { analytics_storage: "granted" });
+      window.gtag("event", "page_view");
+    }
+  }, [cookieChoice]);
   function setConsent(choice) {
     try { localStorage.setItem(COOKIE_CONSENT_KEY, choice); } catch {}
     setCookieChoice(choice);
@@ -2327,7 +2452,23 @@ function AppContent() {
     setPhotoAttached(false);
   }
   function handleSubmit() {
-    if (!form.title.trim() || !form.description.trim()) {
+    // Honeypot: real users never see or fill this field, so a filled value means a bot.
+    // Silently drop it rather than telling the bot why, and don't reset the timer/toast.
+    if (honeypot.trim()) return;
+    // Time-trap: reject submissions filed implausibly fast (scripted spam), without
+    // punishing normal typing speed.
+    if (Date.now() - formOpenedAt.current < 2000) {
+      showToast("That was fast — please double-check your report and try again.");
+      return;
+    }
+    const errs = {};
+    if (!form.title.trim()) errs.title = t("requiredField");
+    if (!form.description.trim() || form.description.trim().length < 10) {
+      errs.description = form.description.trim() ? "Please add a bit more detail (at least 10 characters)." : t("requiredField");
+    }
+    if (!form.district) errs.district = t("requiredField");
+    setFormErrors(errs);
+    if (Object.keys(errs).length > 0) {
       showToast("Add a short title and description before logging the case.");
       return;
     }
@@ -2366,6 +2507,9 @@ function AppContent() {
     }
     setForm({ title: "", description: "", district: form.district, language: form.language, category: "" });
     setPhotoAttached(false);
+    setFormErrors({});
+    setHoneypot("");
+    formOpenedAt.current = Date.now();
     setTab("clusters");
   }
   function handleOpenMatch(id) {
@@ -2548,6 +2692,7 @@ function AppContent() {
                   photoAttached={photoAttached} photoFile={photoFile} photoPreviewUrl={photoPreviewUrl}
                   onPhotoButtonClick={handlePhotoButtonClick} onPhotoSelected={handlePhotoSelected}
                   onRemovePhoto={handleRemovePhoto} fileInputRef={fileInputRef} preview={preview}
+                  errors={formErrors} honeypot={honeypot} setHoneypot={setHoneypot}
                 />
               )}
               {tab === "clusters" && (
