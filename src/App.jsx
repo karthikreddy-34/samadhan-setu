@@ -106,10 +106,19 @@ const TRANSLATIONS = {
     continue: "Continue", close: "Close", selectLanguage: "Select language",
     department: "Higher & Technical Education · Government of Jharkhand",
     chooseRole: "Choose your role to continue. Each account only sees the data it's permitted to.",
-    enterPassword: "Enter the password for this account to continue.", password: "Password",
+    enterPassword: "Enter your email, mobile number and password to continue.", password: "Password",
     enterPasswordPlaceholder: "Enter password", signIn: "Sign in", switchRole: "Switch role",
     chooseDifferentRole: "← Choose a different role", incorrectPassword: "Incorrect password for this demo account.",
     demoPassword: "Demo password", signInAs: "Sign in as", accessRole: "Access is role-scoped and password-protected, like the production system would be.",
+    email: "Email address", mobile: "Mobile number", enterEmailPlaceholder: "you@example.com", enterMobilePlaceholder: "10-digit mobile number",
+    invalidEmail: "Enter a valid email address.", invalidMobile: "Enter a valid 10-digit mobile number.", requiredField: "This field is required.",
+    loginSuccess: "Signed in successfully.", contactUs: "Contact", page404Title: "Page not found",
+    page404Body: "The page you're looking for doesn't exist or has moved.", page404Back: "Back to Samadhan Setu",
+    cookieMsg: "This demo stores your reports and notifications in your browser's local storage so they survive a refresh. No data is sent to a server.",
+    cookieAccept: "Accept", cookieDecline: "Decline", cookieSettings: "Cookie preferences",
+    passwordPolicyHint: "Password must have:", agreeToTermsPrefix: "I agree to the", termsLinkLabel: "Terms & Conditions",
+    mustAcceptTerms: "You must accept the Terms & Conditions to continue.", termsTitle: "Terms & Conditions",
+    termsClose: "Close",
     reportProblem: "Report a Problem", caseClusters: "Case Clusters", facultyMatch: "Faculty Match", controlRoom: "Control Room", caseFiles: "Case Files",
     portalTagline: "Societal Innovation Collaboration Portal — routing citizen problems into university research and industry solutions.",
     cases: "cases", reports: "reports", districts: "districts", reportChallenge: "Report a societal challenge",
@@ -405,12 +414,35 @@ function DirectionsLink({ geo, label }) {
 
 const STAGES = ["Logged", "Assigned to University", "Prototype in Development", "Industry Partnership", "Piloting", "Deployed"];
 
+// Demo credentials are stored as SHA-256 hashes, not plaintext, and compared with the Web
+// Crypto API at login time — see hashPassword()/PASSWORD_POLICY below. This is a mitigation,
+// not real security: anyone can still brute-force a hash from devtools in an all-client app.
+// A production build must verify credentials on a server that never ships the check to the browser.
 const ROLE_META = {
-  Citizen: { label: "Citizen", demoName: "Meera Devi", demoSub: "Resident, Chatra district", icon: User, desc: "Report a problem and see how many others share it.", tabs: ["submit", "clusters"], password: "citizen123", scopeNote: "Sees full detail only on cases they personally filed; other cases appear as redacted public summaries." },
-  Faculty: { label: "University Faculty", demoName: "Dr. R. Oraon", demoSub: "BIT Mesra", icon: GraduationCap, desc: "Review clustered cases and take on ones matching your research.", tabs: ["clusters", "match", "lifecycle"], password: "faculty123", scopeNote: "Sees the open, unassigned pool plus only their own assigned cases — not other institutions' active work." },
-  Industry: { label: "Industry Partner", demoName: "Anil Verma", demoSub: "Sal Valley Ventures", icon: Building2, desc: "Co-fund and track prototypes moving toward deployment.", tabs: ["clusters", "lifecycle"], password: "industry123", scopeNote: "Sees only cases that have reached Industry Partnership stage or later — not raw citizen submissions." },
-  Government: { label: "Government Official", demoName: "S. Kumari", demoSub: "Dept. of Higher & Technical Education", icon: LayoutDashboard, desc: "Full oversight — submissions, routing, funding and analytics.", tabs: ["submit", "clusters", "match", "dashboard", "lifecycle"], password: "govt2026", scopeNote: "Unrestricted access — the only role that can see every case, every stage, statewide." },
+  Citizen: { label: "Citizen", demoName: "Meera Devi", demoSub: "Resident, Chatra district", icon: User, desc: "Report a problem and see how many others share it.", tabs: ["submit", "clusters"], passwordHash: "2de7e52a7a2095efc4f44de114542e045912e3711d286ee64943c95afeae82ab", scopeNote: "Sees full detail only on cases they personally filed; other cases appear as redacted public summaries." },
+  Faculty: { label: "University Faculty", demoName: "Dr. R. Oraon", demoSub: "BIT Mesra", icon: GraduationCap, desc: "Review clustered cases and take on ones matching your research.", tabs: ["clusters", "match", "lifecycle"], passwordHash: "9859bcef2187144a16f11447b17129443780817a119496650b96bf354a65739e", scopeNote: "Sees the open, unassigned pool plus only their own assigned cases — not other institutions' active work." },
+  Industry: { label: "Industry Partner", demoName: "Anil Verma", demoSub: "Sal Valley Ventures", icon: Building2, desc: "Co-fund and track prototypes moving toward deployment.", tabs: ["clusters", "lifecycle"], passwordHash: "0d347dd64b95a49b2b58a17e49a6cfaa0c69547fcebce4748ac4f4f799a28cfd", scopeNote: "Sees only cases that have reached Industry Partnership stage or later — not raw citizen submissions." },
+  Government: { label: "Government Official", demoName: "S. Kumari", demoSub: "Dept. of Higher & Technical Education", icon: LayoutDashboard, desc: "Full oversight — submissions, routing, funding and analytics.", tabs: ["submit", "clusters", "match", "dashboard", "lifecycle"], passwordHash: "a0dea5a8ef72f715a908fb1e31d7244a6ccb63a2b54fd6b41a44d335a7f64258", scopeNote: "Unrestricted access — the only role that can see every case, every stage, statewide." },
 };
+
+async function hashPassword(plain) {
+  const enc = new TextEncoder().encode(plain);
+  const digest = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Forced strong-password policy: 8+ chars, upper, lower, digit, special. Applied to every
+// login attempt regardless of role.
+const PASSWORD_POLICY = [
+  { id: "len", test: (pw) => pw.length >= 8, label: "At least 8 characters" },
+  { id: "upper", test: (pw) => /[A-Z]/.test(pw), label: "One uppercase letter" },
+  { id: "lower", test: (pw) => /[a-z]/.test(pw), label: "One lowercase letter" },
+  { id: "digit", test: (pw) => /[0-9]/.test(pw), label: "One number" },
+  { id: "special", test: (pw) => /[^A-Za-z0-9]/.test(pw), label: "One special character" },
+];
+function unmetPasswordRules(pw) {
+  return PASSWORD_POLICY.filter((r) => !r.test(pw));
+}
 
 /* Row-level access scoping — mirrors an IAM policy per role, applied before data ever reaches a screen. */
 function scopeProblems(problems, user) {
@@ -421,36 +453,74 @@ function scopeProblems(problems, user) {
 }
 
 const SEED = [
-  { id: 1, caseNo: "JH-WTR-1042", category: "Water", district: "Chatra", title: "Community handpump has run dry", description: "Community handpump has been dry for three months, forcing women and children to walk nearly two kilometres daily to fetch drinking water from the neighbouring village. The groundwater table in this hamlet has dropped sharply after two weak monsoons, and the panchayat's request for a new borewell has been pending for over a year with no site survey conducted yet. Elderly residents and pregnant women are worst affected, since the daily trip eats into time otherwise spent on farm work, schooling, or rest. The issue has been raised at three separate gram sabha meetings, but no written response has come from the block water resources office so far.", summary: "Community handpump has been dry for three months, forcing daily two-kilometre water trips.", votes: 46, status: "Assigned to University", matchedFaculty: "Dr. R. Oraon · BIT Mesra", daysAgo: 52, fundingGoal: 0, fundingPledged: 0 },
-  { id: 2, caseNo: "JH-EDU-1043", category: "Education", district: "Gumla", title: "No science teacher for two years", description: "No science teacher has been posted at the government high school for two years, leaving close to 140 students across classes 9 and 10 without formal instruction in physics, chemistry, or biology. Students are self-studying from old notes and photocopied textbooks passed between classmates, with almost no practical lab exposure ahead of their board exams. The school's single science laboratory now sits mostly unused, and the classroom meant for science periods has been repurposed for general assembly instead. Parents have submitted three written requests to the block education office, but the vacancy remains unfilled due to a district-wide shortage of qualified science teachers.", summary: "No science teacher posted for two years; students are self-studying ahead of board exams.", votes: 31, status: "Prototype in Development", matchedFaculty: "Dr. K. Singh · Ranchi University", daysAgo: 61, fundingGoal: 0, fundingPledged: 0 },
-  { id: 3, caseNo: "JH-HLT-1044", category: "Healthcare", district: "Simdega", title: "Sub-health centre has no doctor visits", description: "The sub-health centre has had no doctor visits since last winter, despite serving roughly a dozen surrounding villages with a combined population of over six thousand people. Pregnant women now travel eighteen kilometres to the nearest functioning clinic for routine checkups, often relying on shared jeeps that run only twice a day. At least two high-risk pregnancies flagged by the local ASHA worker have gone unmonitored through the third trimester due to the lack of a resident doctor. The centre's pharmacy has also been out of basic medicines for over two months, compounding the effect of the staffing gap on maternal and general health.", summary: "Sub-health centre has had no doctor visits since last winter; pregnant women travel far for checkups.", votes: 58, status: "Industry Partnership", matchedFaculty: "Dr. M. Toppo · RIMS, Ranchi", daysAgo: 74, fundingGoal: 150000, fundingPledged: 95000, fundingUsed: 61000, fundingPartner: "Plateau Health Foundation", expenses: [
+  { id: 1, caseNo: "JH-WTR-1042", category: "Water", district: "Chatra", title: "Community handpump has run dry", description: "Community handpump has been dry for three months. Women and children are walking nearly two kilometres daily to fetch drinking water from the neighbouring village.", votes: 46, status: "Assigned to University", matchedFaculty: "Dr. R. Oraon · BIT Mesra", daysAgo: 52, fundingGoal: 0, fundingPledged: 0 },
+  { id: 2, caseNo: "JH-EDU-1043", category: "Education", district: "Gumla", title: "No science teacher for two years", description: "No science teacher has been posted at the government high school for two years. Students are self-studying from old notes before board exams.", votes: 31, status: "Prototype in Development", matchedFaculty: "Dr. K. Singh · Ranchi University", daysAgo: 61, fundingGoal: 0, fundingPledged: 0 },
+  { id: 3, caseNo: "JH-HLT-1044", category: "Healthcare", district: "Simdega", title: "Sub-health centre has no doctor visits", description: "The sub-health centre has had no doctor visits since last winter. Pregnant women now travel eighteen kilometres for routine checkups.", votes: 58, status: "Industry Partnership", matchedFaculty: "Dr. M. Toppo · RIMS, Ranchi", daysAgo: 74, fundingGoal: 150000, fundingPledged: 95000, fundingUsed: 61000, fundingPartner: "Plateau Health Foundation", expenses: [
     { id: "e3-1", amount: 32000, note: "Telemedicine kiosk hardware", by: "Dr. M. Toppo", at: 1 },
     { id: "e3-2", amount: 29000, note: "Community health worker stipends (2 months)", by: "Dr. M. Toppo", at: 2 },
   ] },
-  { id: 4, caseNo: "JH-AGR-1045", category: "Agriculture", district: "West Singhbhum", title: "Wild elephants damage paddy every season", description: "Wild elephants damage the paddy fields every harvest season, entering from the adjoining forest corridor at night and trampling entire plots within a few hours. Families across this cluster of villages lose an entire season's income overnight, with no compensation process currently reaching them despite repeated complaints filed with the forest department. Farmers have tried makeshift solar fencing and night-time drum patrols, but neither has meaningfully reduced how often the herds return. Since paddy is the primary crop for most households here, the recurring losses are pushing several families toward debt before the next planting cycle even begins.", summary: "Wild elephants damage paddy fields every harvest season, wiping out a season's income overnight.", votes: 39, status: "Prototype in Development", matchedFaculty: "Dr. S. Kujur · BAU Ranchi", daysAgo: 40, fundingGoal: 0, fundingPledged: 0 },
-  { id: 5, caseNo: "JH-AGR-1046", category: "Agriculture", district: "Ramgarh", title: "No cold storage for tomato farmers", description: "There is no cold storage facility for tomato farmers within roughly forty kilometres, so nearly a third of the harvest rots before it reaches the market during peak season. Farmers currently sell at throwaway prices to middlemen who arrive with refrigerated trucks, since holding the produce even two extra days risks spoiling the entire batch. A proposed cooperative cold-storage unit was discussed three years ago but never moved past the planning stage due to funding gaps between the panchayat and the agriculture department. Better storage infrastructure could directly raise farmgate prices and cut post-harvest losses for dozens of tomato-growing villages nearby.", summary: "No cold storage for tomato farmers nearby, so nearly a third of the harvest rots before sale.", votes: 22, status: "Logged", matchedFaculty: null, daysAgo: 9, fundingGoal: 0, fundingPledged: 0 },
-  { id: 6, caseNo: "JH-ENV-1047", category: "Environment", district: "East Singhbhum", title: "Illegal mining clouding the river", description: "Illegal sand and stone mining upstream has turned the river water cloudy and undrinkable for three villages downstream, with visible silt deposits now reaching stretches that previously stayed clear year-round. Local fishing catches have dropped noticeably over the past two seasons, and several households that once relied on the river for both drinking and irrigation have had to switch to handpumps instead. Villagers have reported the illegal mining operation to the district mining office twice, but enforcement visits have been irregular and no action has followed. Continued pollution also risks longer-term contamination of the groundwater table feeding nearby wells.", summary: "Illegal mining upstream has turned the river cloudy and undrinkable for three villages downstream.", votes: 44, status: "Assigned to University", matchedFaculty: "Dr. N. Verma · Vinoba Bhave University", daysAgo: 35, fundingGoal: 0, fundingPledged: 0 },
-  { id: 7, caseNo: "JH-ENV-1048", category: "Environment", district: "Khunti", title: "Sal forest clearing has dried up springs", description: "Sal forest clearing near the hills has dried up two natural springs that the village depended on for both drinking water and irrigating its terraced fields. The clearing, linked to unregulated timber extraction over the past three years, has visibly thinned the tree cover on the upper slopes that once retained monsoon runoff through the dry months. Since the springs failed, women now walk an extra forty minutes to the nearest alternative source, and terrace farmers have had to abandon part of their rabi crop for lack of irrigation water. Village elders say this is the first time in living memory that both springs have dried up in the same year.", summary: "Sal forest clearing has dried up two natural springs the village depended on.", votes: 18, status: "Logged", matchedFaculty: null, daysAgo: 6, fundingGoal: 0, fundingPledged: 0 },
-  { id: 8, caseNo: "JH-NRG-1049", category: "Energy", district: "Dhanbad", title: "Six to eight hour daily power cuts", description: "Power cuts of six to eight hours daily are shutting down small welding and workshop units across this industrial cluster, cutting into already thin margins for roughly thirty small business owners. Most units run diesel generators as a stopgap, but rising fuel costs have made that an unsustainable long-term fix for daily operations. The outages tend to cluster in the afternoon, exactly when workshops need continuous power for cutting and welding equipment that can't tolerate frequent restarts. Business owners have petitioned the local electricity board for a dedicated feeder line but have not received a firm timeline for approval.", summary: "Six to eight hour daily power cuts are shutting down small welding and workshop units.", votes: 27, status: "Logged", matchedFaculty: null, daysAgo: 14, fundingGoal: 0, fundingPledged: 0 },
-  { id: 9, caseNo: "JH-URB-1050", category: "Urban Development", district: "Ranchi", title: "Ward 12 floods every monsoon", description: "Ward 12 floods every monsoon because the stormwater drains were never connected to the main channel during the last road expansion project nearly six years ago. Water pools to knee-depth on the main road within an hour of heavy rain, cutting off access for two-wheelers and stranding residents in low-lying homes along the ward's eastern stretch. Local shopkeepers report recurring stock damage each monsoon season, and the municipal corporation's temporary desilting measures have not addressed the underlying connectivity gap in the drainage network. Residents have filed the same complaint for three consecutive monsoon seasons without a permanent fix being scheduled.", summary: "Ward 12 floods every monsoon due to stormwater drains never connected to the main channel.", votes: 63, status: "Deployed", matchedFaculty: "Dr. A. Mahto · IIT (ISM) Dhanbad", daysAgo: 210, fundingGoal: 220000, fundingPledged: 220000, fundingUsed: 218500, fundingPartner: "Mesra Innovation & Incubation Cell", expenses: [
+  { id: 4, caseNo: "JH-AGR-1045", category: "Agriculture", district: "West Singhbhum", title: "Wild elephants damage paddy every season", description: "Wild elephants damage the paddy fields every harvest season, and families lose an entire season's income overnight with no compensation process.", votes: 39, status: "Prototype in Development", matchedFaculty: "Dr. S. Kujur · BAU Ranchi", daysAgo: 40, fundingGoal: 0, fundingPledged: 0 },
+  { id: 5, caseNo: "JH-AGR-1046", category: "Agriculture", district: "Ramgarh", title: "No cold storage for tomato farmers", description: "There is no cold storage facility for tomato farmers nearby, so nearly a third of the harvest rots before it reaches the market.", votes: 22, status: "Logged", matchedFaculty: null, daysAgo: 9, fundingGoal: 0, fundingPledged: 0 },
+  { id: 6, caseNo: "JH-ENV-1047", category: "Environment", district: "East Singhbhum", title: "Illegal mining clouding the river", description: "Illegal sand and stone mining upstream has turned the river water cloudy and undrinkable for three villages downstream.", votes: 44, status: "Assigned to University", matchedFaculty: "Dr. N. Verma · Vinoba Bhave University", daysAgo: 35, fundingGoal: 0, fundingPledged: 0 },
+  { id: 7, caseNo: "JH-ENV-1048", category: "Environment", district: "Khunti", title: "Sal forest clearing has dried up springs", description: "Sal forest clearing near the hills has dried up two natural springs that the village depended on for drinking and irrigation.", votes: 18, status: "Logged", matchedFaculty: null, daysAgo: 6, fundingGoal: 0, fundingPledged: 0 },
+  { id: 8, caseNo: "JH-NRG-1049", category: "Energy", district: "Dhanbad", title: "Six to eight hour daily power cuts", description: "Power cuts of six to eight hours daily are shutting down small welding and workshop units, cutting into already thin margins.", votes: 27, status: "Logged", matchedFaculty: null, daysAgo: 14, fundingGoal: 0, fundingPledged: 0 },
+  { id: 9, caseNo: "JH-URB-1050", category: "Urban Development", district: "Ranchi", title: "Ward 12 floods every monsoon", description: "Ward 12 floods every monsoon because the stormwater drains were never connected to the main channel during the last road expansion.", votes: 63, status: "Deployed", matchedFaculty: "Dr. A. Mahto · IIT (ISM) Dhanbad", daysAgo: 210, fundingGoal: 220000, fundingPledged: 220000, fundingUsed: 218500, fundingPartner: "Mesra Innovation & Incubation Cell", expenses: [
     { id: "e9-1", amount: 140000, note: "Stormwater sensor network + install", by: "Dr. A. Mahto", at: 1 },
     { id: "e9-2", amount: 52000, note: "GIS drainage mapping survey", by: "Dr. A. Mahto", at: 2 },
     { id: "e9-3", amount: 26500, note: "Field crew + equipment transport", by: "Dr. A. Mahto", at: 3 },
   ] },
-  { id: 10, caseNo: "JH-URB-1051", category: "Urban Development", district: "Bokaro", title: "No street lighting for a kilometre", description: "There is no street lighting for almost a kilometre on the main road connecting the residential colony to the market area, and residents avoid walking that stretch after dark because of safety concerns. Two minor two-wheeler accidents have been reported on the unlit stretch over the past six months, both attributed partly to poor visibility at night. Women commuting home from work or evening tuition classes now arrange group walks or paid transport instead of covering the short distance alone. The ward councillor has acknowledged the gap but has cited pending budget approval for new poles and wiring before work can start.", summary: "No street lighting for almost a kilometre; residents avoid walking after dark.", votes: 15, status: "Logged", matchedFaculty: null, daysAgo: 4, fundingGoal: 0, fundingPledged: 0 },
-  { id: 11, caseNo: "JH-ACC-1052", category: "Accessibility", district: "Hazaribagh", title: "Block office has no ramp", description: "The block office has no ramp, so wheelchair users and elderly visitors are carried up the single flight of stairs by strangers or family members for every single visit, including routine paperwork like pension renewals. The building was constructed over a decade ago, before accessibility norms were as strictly enforced, and no retrofit has been carried out since. At least two disabled residents in the area say they now avoid the office altogether because of the physical difficulty, delaying their access to government schemes they are otherwise entitled to. A simple ramp and handrail installation could restore access for an estimated fifteen to twenty differently-abled residents who regularly need the office's services.", summary: "Block office has no ramp, so wheelchair users are carried up the stairs on every visit.", votes: 12, status: "Logged", matchedFaculty: null, daysAgo: 8, fundingGoal: 0, fundingPledged: 0 },
-  { id: 12, caseNo: "JH-LVH-1053", category: "Rural Livelihoods", district: "Dumka", title: "Artisans have no market beyond the haat", description: "Handicraft artisans have no market beyond the weekly haat, and most of their work — including bamboo craft and traditional textile weaving — sells for a fraction of its real worth to local traders who resell it at a significant markup in nearby towns. Around forty artisan households in the area rely on this craft as a secondary income source alongside farming, but the lack of direct market access or branding keeps their earnings consistently low. Several artisans have expressed interest in an online marketplace or an exhibition stall at district fairs but lack the resources or guidance to set one up on their own. Better market linkage could meaningfully raise household income without requiring any change to their existing craft practice.", summary: "Artisans have no market beyond the weekly haat and sell work for a fraction of its worth.", votes: 29, status: "Assigned to University", matchedFaculty: "Dr. P. Hansda · XISS, Ranchi", daysAgo: 45, fundingGoal: 0, fundingPledged: 0 },
-  { id: 13, caseNo: "JH-LVH-1054", category: "Rural Livelihoods", district: "Khunti", title: "Lac cultivators use decades-old methods", description: "Lac cultivators still rely on decades-old processing methods passed down through generations, which cuts deeply into both yield and quality compared to lac produced in neighbouring states using more modern extraction techniques. The traditional method results in higher wastage during the scraping and washing stages, and cultivators have no access to updated equipment or training on improved practices. Roughly sixty households in the surrounding villages depend on lac cultivation as a primary or secondary income source, particularly during the lean agricultural season. Introducing modern processing techniques and basic quality-testing equipment could substantially improve both yield and market price for these local cultivators.", summary: "Lac cultivators still use decades-old methods, cutting into yield and quality.", votes: 17, status: "Logged", matchedFaculty: null, daysAgo: 11, fundingGoal: 0, fundingPledged: 0 },
-  { id: 14, caseNo: "JH-ADM-1055", category: "Public Administration", district: "Godda", title: "Caste certificate pending six months", description: "Caste certificate applications have been pending for over six months with no update on status available to the applicant, despite the official processing timeline stating a maximum of thirty days. Several applicants, including students who need the certificate for scholarship or college admission purposes, have visited the block office multiple times only to be told the file is 'under verification' with no further detail offered. The lack of an online tracking system means applicants have no way to check progress remotely, forcing repeated in-person visits that cost daily-wage earners a full day's income each time. At least a dozen similarly delayed applications have been reported from the same block over the past year.", summary: "Caste certificate applications pending over six months with no status update.", votes: 34, status: "Logged", matchedFaculty: null, daysAgo: 20, fundingGoal: 0, fundingPledged: 0 },
-  { id: 15, caseNo: "JH-WTR-1056", category: "Water", district: "Sahibganj", title: "Arsenic levels above safe limits", description: "Groundwater tests conducted by a district health team show arsenic levels above safe limits in three hamlets, but no alternative water source has been provided to residents yet despite the results being shared with the block office over four months ago. Long-term consumption of arsenic-contaminated water carries serious health risks, and a few residents have already reported skin lesions consistent with early-stage arsenic exposure. The affected hamlets currently have no functioning water treatment or filtration system in place, and the nearest confirmed-safe handpump is over a kilometre away. Community health workers have recommended urgent installation of arsenic-removal units or a piped connection from an unaffected source.", summary: "Groundwater tests show arsenic above safe limits; no alternative water source provided yet.", votes: 21, status: "Logged", matchedFaculty: null, daysAgo: 13, fundingGoal: 0, fundingPledged: 0 },
-  { id: 16, caseNo: "JH-EDU-1057", category: "Education", district: "Latehar", title: "School roof collapsed after monsoon", description: "The school building roof partially collapsed after heavy monsoon rains this year, damaging two classrooms and forcing all classes to run in the open courtyard without any shelter from sun or rain. Roughly one hundred and eighty students across the primary and middle school sections are affected, and several parents have raised safety concerns about continuing classes outdoors through the rest of the monsoon season. The building, constructed over twenty-five years ago, has not undergone any structural inspection or maintenance in recent memory. Teachers have improvised with tarpaulin sheets to keep lessons going, but the arrangement is not sustainable once the rains intensify further.", summary: "School roof partially collapsed after monsoon rains; classes now run in the open courtyard.", votes: 25, status: "Logged", matchedFaculty: null, daysAgo: 17, fundingGoal: 0, fundingPledged: 0 },
-  { id: 17, caseNo: "JH-HLT-1058", category: "Healthcare", district: "Palamu", title: "Anganwadi centres out of nutrition supplies", description: "Anganwadi centres across this block have lacked basic nutrition supplies for three consecutive months, and routine malnutrition checks for children under five have stopped entirely because of the shortage. Around eight anganwadi centres serving over three hundred children are affected, and several frontline workers report that pregnant and lactating mothers have also missed their supplementary nutrition rations during this period. The supply chain disruption has been attributed to delayed fund transfers from the district office, though the exact cause remains unclear to workers on the ground. Continued gaps in monitoring raise the risk of undetected malnutrition cases going untreated through a crucial early-childhood window.", summary: "Anganwadi centres out of nutrition supplies for three months; malnutrition checks have stopped.", votes: 33, status: "Piloting", matchedFaculty: "Dr. M. Toppo · RIMS, Ranchi", daysAgo: 95, fundingGoal: 90000, fundingPledged: 90000, fundingUsed: 97500, fundingPartner: "Plateau Health Foundation", expenses: [
+  { id: 10, caseNo: "JH-URB-1051", category: "Urban Development", district: "Bokaro", title: "No street lighting for a kilometre", description: "There is no street lighting for almost a kilometre on the main road, and residents avoid walking after dark.", votes: 15, status: "Logged", matchedFaculty: null, daysAgo: 4, fundingGoal: 0, fundingPledged: 0 },
+  { id: 11, caseNo: "JH-ACC-1052", category: "Accessibility", district: "Hazaribagh", title: "Block office has no ramp", description: "The block office has no ramp, so wheelchair users are carried up the stairs by strangers for every single visit.", votes: 12, status: "Logged", matchedFaculty: null, daysAgo: 8, fundingGoal: 0, fundingPledged: 0 },
+  { id: 12, caseNo: "JH-LVH-1053", category: "Rural Livelihoods", district: "Dumka", title: "Artisans have no market beyond the haat", description: "Handicraft artisans have no market beyond the weekly haat, and most of their work sells for a fraction of its real worth.", votes: 29, status: "Assigned to University", matchedFaculty: "Dr. P. Hansda · XISS, Ranchi", daysAgo: 45, fundingGoal: 0, fundingPledged: 0 },
+  { id: 13, caseNo: "JH-LVH-1054", category: "Rural Livelihoods", district: "Khunti", title: "Lac cultivators use decades-old methods", description: "Lac cultivators still rely on decades-old processing methods, which cuts deeply into both yield and quality compared to nearby states.", votes: 17, status: "Logged", matchedFaculty: null, daysAgo: 11, fundingGoal: 0, fundingPledged: 0 },
+  { id: 14, caseNo: "JH-ADM-1055", category: "Public Administration", district: "Godda", title: "Caste certificate pending six months", description: "Caste certificate applications have been pending for over six months with no update on status available to the applicant.", votes: 34, status: "Logged", matchedFaculty: null, daysAgo: 20, fundingGoal: 0, fundingPledged: 0 },
+  { id: 15, caseNo: "JH-WTR-1056", category: "Water", district: "Sahibganj", title: "Arsenic levels above safe limits", description: "Groundwater tests show arsenic levels above safe limits in three hamlets, but no alternative water source has been provided yet.", votes: 21, status: "Logged", matchedFaculty: null, daysAgo: 13, fundingGoal: 0, fundingPledged: 0 },
+  { id: 16, caseNo: "JH-EDU-1057", category: "Education", district: "Latehar", title: "School roof collapsed after monsoon", description: "The school building roof partially collapsed after monsoon rains, and classes now run in the open courtyard without any shelter.", votes: 25, status: "Logged", matchedFaculty: null, daysAgo: 17, fundingGoal: 0, fundingPledged: 0 },
+  { id: 17, caseNo: "JH-HLT-1058", category: "Healthcare", district: "Palamu", title: "Anganwadi centres out of nutrition supplies", description: "Anganwadi centres have lacked basic nutrition supplies for three consecutive months, and malnutrition checks have stopped entirely.", votes: 33, status: "Piloting", matchedFaculty: "Dr. M. Toppo · RIMS, Ranchi", daysAgo: 95, fundingGoal: 90000, fundingPledged: 90000, fundingUsed: 97500, fundingPartner: "Plateau Health Foundation", expenses: [
     { id: "e17-1", amount: 45000, note: "Nutrition supply restocking, 6 centres", by: "Dr. M. Toppo", at: 1 },
     { id: "e17-2", amount: 38000, note: "Cold-chain storage unit", by: "Dr. M. Toppo", at: 2 },
     { id: "e17-3", amount: 14500, note: "Field monitoring visits", by: "Dr. M. Toppo", at: 3 },
   ] },
-  { id: 18, caseNo: "JH-NRG-1059", category: "Energy", district: "Giridih", title: "Transformer down for three weeks", description: "A blown transformer has been down for three weeks, leaving two hamlets without any grid power ahead of the exam season, forcing students preparing for board exams to study by kerosene lamp or mobile phone flashlight after sunset. The local electricity department has cited a shortage of replacement transformers in district stock as the reason for the delay, with no confirmed repair date given so far. Small households running refrigerators for medicine storage have also been affected, and one family reported spoiled insulin because of the prolonged outage. Residents have escalated the complaint through the block-level grievance cell but have not yet received a written response.", summary: "Blown transformer down for three weeks, leaving two hamlets without grid power.", votes: 9, status: "Logged", matchedFaculty: null, daysAgo: 3, fundingGoal: 0, fundingPledged: 0 },
+  { id: 18, caseNo: "JH-NRG-1059", category: "Energy", district: "Giridih", title: "Transformer down for three weeks", description: "A blown transformer has been down for three weeks, leaving two hamlets without any grid power ahead of the exam season.", votes: 9, status: "Logged", matchedFaculty: null, daysAgo: 3, fundingGoal: 0, fundingPledged: 0 },
 ];
+
+/* ---------------------------------- shared persistence ----------------------------------
+   All four roles (Citizen, University/Faculty, Industry, Government) run inside the SAME
+   React tree — a report logged by a citizen is already in shared state and visible to the
+   other roles the instant you switch role in this tab. What does NOT survive on its own is
+   a page refresh or a second tab: useState(SEED) remounts fresh every time. localStorage
+   fixes exactly that, and — because it's per-origin, not per-tab — it also keeps every open
+   tab of this app in sync with each other via the "storage" event below. This is the right
+   fix for "make it persist across role switches"; it is NOT a substitute for a real backend
+   if this ever needs to serve genuinely different devices/users at once. */
+const STORAGE_KEY = "samadhan-setu-problems";
+const NOTIF_STORAGE_KEY = "samadhan-setu-notifications";
+const COOKIE_CONSENT_KEY = "samadhan-setu-cookie-consent";
+// Absolute URL of the generated social-preview.png once it's hosted on your real domain —
+// crawlers for Open Graph/Twitter Card previews won't fetch a relative path or localhost URL.
+const SOCIAL_IMAGE_URL = "https://your-domain.example/social-preview.png";
+
+function loadPersistedProblems() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return SEED;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length ? parsed : SEED;
+  } catch {
+    return SEED;
+  }
+}
+
+function loadPersistedNotifications() {
+  try {
+    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 const DUPLICATE_SAMPLE = {
   title: "Our handpump has been dry for weeks",
@@ -467,29 +537,8 @@ const VOICE_SAMPLE = {
   description: "The wooden footbridge near the market has broken planks and no railing, and villagers risk the crossing every single morning to reach the other side.",
   district: "Simdega",
 };
-/* SIH demo scenario: citizen → university → industry → government, end-to-end.
-   Kept in a different district from the seeded elephant case (JH-AGR-1045, West Singhbhum)
-   so the duplicate-detection engine treats it as a genuinely new case, not a merge. */
-const ELEPHANT_CONFLICT_SAMPLE = {
-  title: "Elephants entering villages damage crops and endanger lives",
-  description: "Every year, elephants enter villages and agricultural areas in our region, damaging crops, destroying property and sometimes causing loss of human lives. The problem is recurring, and existing responses are mostly reactive. Communities need an early warning and long-term solution to reduce conflict while also protecting wildlife.",
-  district: "Saraikela Kharsawan",
-};
 
 const STOPWORDS = new Set(["this", "that", "with", "from", "have", "were", "been", "into", "their", "there", "which", "about", "after", "before", "during", "over", "under", "more", "than", "they", "them", "also", "near", "only", "very", "some", "many", "most", "without", "still", "every", "single", "entire", "already"]);
-
-/* Card views show a short, scannable summary; the full description is reserved for the
-   "View details" popup. Seeded cases carry a hand-written `summary`; new citizen-submitted
-   cases fall back to this auto-generated one-liner. */
-function shortSummary(text, maxLen = 110) {
-  if (!text) return "";
-  const firstSentence = text.split(/(?<=[.!?])\s/)[0];
-  if (firstSentence.length <= maxLen) return firstSentence;
-  return text.slice(0, maxLen).trim() + "…";
-}
-function cardSummary(p) {
-  return p.summary || shortSummary(p.description);
-}
 
 function tokenize(text) {
   return (text || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 3 && !STOPWORDS.has(w));
@@ -674,15 +723,12 @@ function SubmitTab({
         <h2 className="font-display text-xl" style={{ color: COLORS.ink }}>{t("reportChallenge")}</h2>
         <p className="text-sm mt-1" style={{ color: COLORS.inkSoft }}>{t("reportIntro")}</p>
 
-        <div className="flex gap-2 mt-4 flex-wrap">
+        <div className="flex gap-2 mt-4">
           <button onClick={() => onQuickFill(DUPLICATE_SAMPLE)} className="text-xs font-mono px-3 py-1.5 rounded border" style={{ borderColor: COLORS.rust + "80", color: COLORS.rustDark, background: COLORS.rust + "0F" }}>
             <Wand2 size={12} className="inline mr-1 -mt-0.5" />{t("tryDuplicate")}
           </button>
           <button onClick={() => onQuickFill(NEW_SAMPLE)} className="text-xs font-mono px-3 py-1.5 rounded border" style={{ borderColor: COLORS.forest + "80", color: COLORS.forest, background: COLORS.forest + "0F" }}>
             <FileSearch size={12} className="inline mr-1 -mt-0.5" />{t("tryFresh")}
-          </button>
-          <button onClick={() => onQuickFill(ELEPHANT_CONFLICT_SAMPLE)} className="text-xs font-mono px-3 py-1.5 rounded border" style={{ borderColor: COLORS.violet + "80", color: COLORS.violet, background: COLORS.violet + "0F" }}>
-            <Sparkles size={12} className="inline mr-1 -mt-0.5" />Demo: Elephant conflict
           </button>
         </div>
 
@@ -883,7 +929,7 @@ function ScopeBanner({ user }) {
   );
 }
 
-function FullCaseCard({ p, highlightId, onOpenMatch, onOpenDetails }) {
+function FullCaseCard({ p, highlightId, onOpenMatch }) {
   const { t } = useLanguage();
   return (
     <div
@@ -895,7 +941,7 @@ function FullCaseCard({ p, highlightId, onOpenMatch, onOpenDetails }) {
         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ color: COLORS.inkSoft, background: COLORS.paperDark }}>{p.status}</span>
       </div>
       <div className="mt-2 font-medium text-sm" style={{ color: COLORS.ink }}>{p.title}</div>
-      <p className="text-xs mt-1 leading-relaxed" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
+      <p className="text-xs mt-1 leading-relaxed" style={{ color: COLORS.inkSoft }}>{p.description}</p>
       <div className="flex items-center gap-2 mt-3 flex-wrap">
         <CategoryBadge category={p.category} small />
         <span className="flex items-center gap-1 text-[11px]" style={{ color: COLORS.inkSoft }}><MapPin size={11} />{p.district}</span>
@@ -905,14 +951,9 @@ function FullCaseCard({ p, highlightId, onOpenMatch, onOpenDetails }) {
       <div className="mt-3">
         <UrgencyMeter problem={p} />
       </div>
-      <div className="flex items-center gap-4 mt-3 flex-wrap">
-        <button onClick={() => onOpenDetails(p.id)} className="flex items-center gap-1 text-xs font-medium" style={{ color: COLORS.rustDark }}>
-          View details <ArrowRight size={12} />
-        </button>
-        <button onClick={() => onOpenMatch(p.id)} className="flex items-center gap-1 text-xs font-medium" style={{ color: COLORS.slate }}>
-          {p.matchedFaculty ? `${t("matched")}: ${p.matchedFaculty}` : t("findFaculty")} <ArrowRight size={12} />
-        </button>
-      </div>
+      <button onClick={() => onOpenMatch(p.id)} className="mt-3 flex items-center gap-1 text-xs font-medium" style={{ color: COLORS.slate }}>
+        {p.matchedFaculty ? `${t("matched")}: ${p.matchedFaculty}` : t("findFaculty")} <ArrowRight size={12} />
+      </button>
     </div>
   );
 }
@@ -937,7 +978,7 @@ function RedactedCaseCard({ p }) {
   );
 }
 
-function ClustersTab({ problems, user, highlightId, onOpenMatch, onOpenDetails, filter, setFilter }) {
+function ClustersTab({ problems, user, highlightId, onOpenMatch, filter, setFilter }) {
   const { t, language } = useLanguage();
   const [sortBy, setSortBy] = useState("urgent");
   const isCitizen = user?.role === "Citizen";
@@ -992,7 +1033,7 @@ function ClustersTab({ problems, user, highlightId, onOpenMatch, onOpenDetails, 
                 <span className="text-xs font-mono uppercase tracking-wide" style={{ color: COLORS.forest }}>{t("myReports")}</span>
               </div>
               <div className="grid sm:grid-cols-2 gap-3">
-                {mine.map((p) => <FullCaseCard key={p.id} p={p} highlightId={highlightId} onOpenMatch={onOpenMatch} onOpenDetails={onOpenDetails} />)}
+                {mine.map((p) => <FullCaseCard key={p.id} p={p} highlightId={highlightId} onOpenMatch={onOpenMatch} />)}
               </div>
             </div>
           )}
@@ -1006,14 +1047,14 @@ function ClustersTab({ problems, user, highlightId, onOpenMatch, onOpenDetails, 
         </>
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
-          {filtered.map((p) => <FullCaseCard key={p.id} p={p} highlightId={highlightId} onOpenMatch={onOpenMatch} onOpenDetails={onOpenDetails} />)}
+          {filtered.map((p) => <FullCaseCard key={p.id} p={p} highlightId={highlightId} onOpenMatch={onOpenMatch} />)}
         </div>
       )}
     </div>
   );
 }
 
-function MatchTab({ problems: rawProblems, user, selectedId, setSelectedId, onAssign, onOpenDetails }) {
+function MatchTab({ problems: rawProblems, user, selectedId, setSelectedId, onAssign }) {
   const { t } = useLanguage();
   const problems = useMemo(() => scopeProblems(rawProblems, user), [rawProblems, user]);
   const selected = problems.find((p) => p.id === selectedId) || problems[0];
@@ -1047,19 +1088,12 @@ function MatchTab({ problems: rawProblems, user, selectedId, setSelectedId, onAs
         {selected && (
           <>
             <div className="rounded-lg p-4 mb-4" style={{ background: COLORS.paperDark, border: `1px solid ${COLORS.line}` }}>
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <CaseStamp>{selected.caseNo}</CaseStamp>
-                  <CategoryBadge category={selected.category} />
-                  <span className="text-xs flex items-center gap-1" style={{ color: COLORS.inkSoft }}><MapPin size={11} />{selected.district}</span>
-                </div>
-                {onOpenDetails && (
-                  <button onClick={() => onOpenDetails(selected.id)} className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: COLORS.rustDark }}>
-                    View details <ArrowRight size={12} />
-                  </button>
-                )}
+              <div className="flex items-center gap-2 flex-wrap">
+                <CaseStamp>{selected.caseNo}</CaseStamp>
+                <CategoryBadge category={selected.category} />
+                <span className="text-xs flex items-center gap-1" style={{ color: COLORS.inkSoft }}><MapPin size={11} />{selected.district}</span>
               </div>
-              <p className="text-sm mt-2" style={{ color: COLORS.ink }}>{cardSummary(selected)}</p>
+              <p className="text-sm mt-2" style={{ color: COLORS.ink }}>{selected.description}</p>
               {selected.matchedFaculty && (
                 <div className="text-xs mt-2 flex items-center gap-1" style={{ color: COLORS.forest }}><CheckCircle2 size={13} /> {t("currentlyAssigned")} {selected.matchedFaculty}</div>
               )}
@@ -1109,7 +1143,7 @@ function MatchTab({ problems: rawProblems, user, selectedId, setSelectedId, onAs
   );
 }
 
-function JharkhandMap({ problems, onOpenDetails }) {
+function JharkhandMap({ problems }) {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
 
   const stats = useMemo(() => {
@@ -1199,13 +1233,7 @@ function JharkhandMap({ problems, onOpenDetails }) {
               <div className="space-y-1.5">
                 {problems.filter((p) => p.district === selectedDistrict).slice(0, 4).map((p) => (
                   <div key={p.id} className="text-[11px] leading-snug" style={{ color: COLORS.inkSoft }}>
-                    <CaseStamp>{p.caseNo}</CaseStamp> <span className="ml-1 font-medium" style={{ color: COLORS.ink }}>{p.title}</span>
-                    <p className="mt-0.5" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
-                    {onOpenDetails && (
-                      <button onClick={() => onOpenDetails(p.id)} className="mt-0.5 font-medium flex items-center gap-0.5" style={{ color: COLORS.rustDark }}>
-                        View details <ArrowRight size={9} />
-                      </button>
-                    )}
+                    <CaseStamp>{p.caseNo}</CaseStamp> <span className="ml-1">{p.title}</span>
                   </div>
                 ))}
                 {selectedStats.count === 0 && <div className="text-[11px] italic" style={{ color: COLORS.inkSoft }}>No cases reported here yet.</div>}
@@ -1225,7 +1253,7 @@ function JharkhandMap({ problems, onOpenDetails }) {
   );
 }
 
-function DashboardTab({ problems, onOpenDetails }) {
+function DashboardTab({ problems }) {
   const categoryData = useMemo(() => Object.keys(CATEGORIES).map((cat) => ({ name: cat, count: problems.filter((p) => p.category === cat).length, color: CATEGORIES[cat].color })).filter((d) => d.count > 0).sort((a, b) => b.count - a.count), [problems]);
   const sdgData = useMemo(() => {
     const map = {};
@@ -1280,11 +1308,7 @@ function DashboardTab({ problems, onOpenDetails }) {
                     <CategoryBadge category={p.category} small />
                     <span className="text-[11px] flex items-center gap-1" style={{ color: COLORS.inkSoft }}><MapPin size={10} />{p.district}</span>
                   </div>
-                  <div className="text-xs mt-1 font-medium" style={{ color: COLORS.ink }}>{p.title}</div>
-                  <p className="text-[11px] mt-0.5 leading-snug" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
-                  <button onClick={() => onOpenDetails(p.id)} className="text-[11px] mt-1 font-medium flex items-center gap-0.5" style={{ color: COLORS.rustDark }}>
-                    View details <ArrowRight size={10} />
-                  </button>
+                  <div className="text-xs mt-1 truncate" style={{ color: COLORS.ink }}>{p.title}</div>
                 </div>
                 <div className="w-28 shrink-0">
                   <div className="text-[11px] font-mono font-semibold text-right" style={{ color: uColor }}>
@@ -1335,7 +1359,7 @@ function DashboardTab({ problems, onOpenDetails }) {
       </div>
 
       <div className="mb-6">
-        <JharkhandMap problems={problems} onOpenDetails={onOpenDetails} />
+        <JharkhandMap problems={problems} />
       </div>
 
       <div className="rounded-lg p-4" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_SM }}>
@@ -1353,7 +1377,7 @@ function DashboardTab({ problems, onOpenDetails }) {
         </div>
       </div>
 
-      <FacultyRoster problems={problems} onOpenDetails={onOpenDetails} />
+      <FacultyRoster problems={problems} />
       <PartnerDirectory problems={problems} />
     </div>
   );
@@ -1361,7 +1385,7 @@ function DashboardTab({ problems, onOpenDetails }) {
 
 /* Every faculty member across every partner university, and exactly which cases each one is
    currently handling — the oversight view a government official needs, in one place. */
-function FacultyRoster({ problems, onOpenDetails }) {
+function FacultyRoster({ problems }) {
   const roster = useMemo(
     () =>
       FACULTY.map((f) => {
@@ -1403,18 +1427,10 @@ function FacultyRoster({ problems, onOpenDetails }) {
             {f.assigned.length > 0 ? (
               <div className="mt-2.5 flex flex-col gap-1.5">
                 {f.assigned.map((p) => (
-                  <div key={p.id} className="text-[11px]" style={{ color: COLORS.inkSoft }}>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <CaseStamp>{p.caseNo}</CaseStamp>
-                      <span className="truncate font-medium" style={{ color: COLORS.ink }}>{p.title}</span>
-                      <span className="ml-auto font-mono px-1.5 py-0.5 rounded" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}` }}>{p.status}</span>
-                    </div>
-                    <p className="mt-0.5" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
-                    {onOpenDetails && (
-                      <button onClick={() => onOpenDetails(p.id)} className="mt-0.5 font-medium flex items-center gap-0.5" style={{ color: COLORS.rustDark }}>
-                        View details <ArrowRight size={9} />
-                      </button>
-                    )}
+                  <div key={p.id} className="flex items-center gap-2 flex-wrap text-[11px]" style={{ color: COLORS.inkSoft }}>
+                    <CaseStamp>{p.caseNo}</CaseStamp>
+                    <span className="truncate" style={{ color: COLORS.ink }}>{p.title}</span>
+                    <span className="ml-auto font-mono px-1.5 py-0.5 rounded" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}` }}>{p.status}</span>
                   </div>
                 ))}
               </div>
@@ -1540,32 +1556,77 @@ function LoginBackground() {
   );
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MOBILE_RE = /^[6-9]\d{9}$/;
+
 function LoginScreen({ onLogin }) {
   const { language, setLanguage, t } = useLanguage();
   const [pendingRole, setPendingRole] = useState(null);
+  const [emailInput, setEmailInput] = useState("");
+  const [mobileInput, setMobileInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
   const [shake, setShake] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(true);
 
+  const unmetRules = passwordInput ? unmetPasswordRules(passwordInput) : PASSWORD_POLICY;
+
   function chooseRole(role) {
     setPendingRole(role);
+    setEmailInput("");
+    setMobileInput("");
     setPasswordInput("");
+    setAgreedTerms(false);
     setError("");
+    setFieldErrors({});
   }
   function backToRoles() {
     setPendingRole(null);
+    setEmailInput("");
+    setMobileInput("");
     setPasswordInput("");
+    setAgreedTerms(false);
     setError("");
+    setFieldErrors({});
   }
-  function trySubmit() {
-    if (passwordInput === ROLE_META[pendingRole].password) {
-      onLogin(pendingRole);
-    } else {
-      setError(t("incorrectPassword"));
-      setPasswordInput("");
-      setShake(true);
-      setTimeout(() => setShake(false), 420);
+  function fail(msg) {
+    setError(msg);
+    setShake(true);
+    setTimeout(() => setShake(false), 420);
+  }
+  async function trySubmit() {
+    if (submitting) return;
+    const errs = {};
+    if (!emailInput.trim()) errs.email = t("requiredField");
+    else if (!EMAIL_RE.test(emailInput.trim())) errs.email = t("invalidEmail");
+    if (!mobileInput.trim()) errs.mobile = t("requiredField");
+    else if (!MOBILE_RE.test(mobileInput.trim())) errs.mobile = t("invalidMobile");
+    if (!passwordInput) errs.password = t("requiredField");
+    else if (unmetPasswordRules(passwordInput).length > 0) errs.password = t("passwordPolicyHint");
+    setFieldErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      fail("");
+      return;
+    }
+    if (!agreedTerms) {
+      fail(t("mustAcceptTerms"));
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const hash = await hashPassword(passwordInput);
+      if (hash === ROLE_META[pendingRole].passwordHash) {
+        onLogin(pendingRole, { email: emailInput.trim(), mobile: mobileInput.trim() });
+      } else {
+        setPasswordInput("");
+        fail(t("incorrectPassword"));
+      }
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -1660,21 +1721,68 @@ function LoginScreen({ onLogin }) {
                       <div className="text-[11px] font-mono" style={{ color: COLORS.inkSoft }}>{meta.demoName} · {meta.demoSub}</div>
                     </div>
                   </div>
-                  <label className="text-xs font-mono uppercase tracking-wide block mt-4" style={{ color: COLORS.inkSoft }}>{t("password")}</label>
+                  <label className="text-xs font-mono uppercase tracking-wide block mt-4" style={{ color: COLORS.inkSoft }}>{t("email")}</label>
+                  <div className="relative mt-1">
+                    <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: COLORS.inkSoft }} />
+                    <input type="email" autoFocus value={emailInput} autoComplete="email"
+                      onChange={(e) => { setEmailInput(e.target.value); setFieldErrors((f) => ({ ...f, email: undefined })); setError(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") trySubmit(); }}
+                      placeholder={t("enterEmailPlaceholder")}
+                      className="w-full pl-9 pr-3 py-2 rounded-md text-sm outline-none premium-input transition-shadow"
+                      style={{ background: COLORS.white, border: `1px solid ${fieldErrors.email ? COLORS.rust : COLORS.line}`, color: COLORS.ink }} />
+                  </div>
+                  {fieldErrors.email && <div className="text-[11px] mt-1 font-medium" style={{ color: COLORS.rust }}>{fieldErrors.email}</div>}
+
+                  <label className="text-xs font-mono uppercase tracking-wide block mt-3" style={{ color: COLORS.inkSoft }}>{t("mobile")}</label>
+                  <div className="relative mt-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: COLORS.inkSoft }}>+91</span>
+                    <input type="tel" inputMode="numeric" maxLength={10} value={mobileInput} autoComplete="tel"
+                      onChange={(e) => { setMobileInput(e.target.value.replace(/\D/g, "").slice(0, 10)); setFieldErrors((f) => ({ ...f, mobile: undefined })); setError(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") trySubmit(); }}
+                      placeholder={t("enterMobilePlaceholder")}
+                      className="w-full pl-9 pr-3 py-2 rounded-md text-sm outline-none premium-input transition-shadow"
+                      style={{ background: COLORS.white, border: `1px solid ${fieldErrors.mobile ? COLORS.rust : COLORS.line}`, color: COLORS.ink }} />
+                  </div>
+                  {fieldErrors.mobile && <div className="text-[11px] mt-1 font-medium" style={{ color: COLORS.rust }}>{fieldErrors.mobile}</div>}
+
+                  <label className="text-xs font-mono uppercase tracking-wide block mt-3" style={{ color: COLORS.inkSoft }}>{t("password")}</label>
                   <div className="relative mt-1">
                     <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: COLORS.inkSoft }} />
-                    <input type="password" autoFocus value={passwordInput}
-                      onChange={(e) => { setPasswordInput(e.target.value); setError(""); }}
+                    <input type="password" value={passwordInput} autoComplete="current-password"
+                      onChange={(e) => { setPasswordInput(e.target.value); setFieldErrors((f) => ({ ...f, password: undefined })); setError(""); }}
                       onKeyDown={(e) => { if (e.key === "Enter") trySubmit(); }}
                       placeholder={t("enterPasswordPlaceholder")}
                       className="w-full pl-9 pr-3 py-2 rounded-md text-sm outline-none premium-input transition-shadow"
-                      style={{ background: COLORS.white, border: `1px solid ${error ? COLORS.rust : COLORS.line}`, color: COLORS.ink }} />
+                      style={{ background: COLORS.white, border: `1px solid ${(fieldErrors.password || error) ? COLORS.rust : COLORS.line}`, color: COLORS.ink }} />
                   </div>
+                  {fieldErrors.password && <div className="text-[11px] mt-1 font-medium" style={{ color: COLORS.rust }}>{fieldErrors.password}</div>}
+                  <ul className="mt-2 space-y-0.5">
+                    {PASSWORD_POLICY.map((rule) => {
+                      const met = passwordInput && rule.test(passwordInput);
+                      return (
+                        <li key={rule.id} className="text-[10px] flex items-center gap-1.5" style={{ color: met ? COLORS.forest : COLORS.inkSoft }}>
+                          <CheckCircle2 size={10} style={{ opacity: met ? 1 : 0.35 }} /> {rule.label}
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  <label className="flex items-start gap-2 mt-3 text-[11px]" style={{ color: COLORS.inkSoft }}>
+                    <input type="checkbox" checked={agreedTerms}
+                      onChange={(e) => { setAgreedTerms(e.target.checked); setError(""); }}
+                      className="mt-0.5" />
+                    <span>
+                      {t("agreeToTermsPrefix")}{" "}
+                      <button type="button" onClick={() => setTermsOpen(true)} className="underline underline-offset-2 font-medium" style={{ color: COLORS.slate }}>
+                        {t("termsLinkLabel")}
+                      </button>
+                    </span>
+                  </label>
+
                   {error && <div className="text-[11px] mt-1.5 font-medium" style={{ color: COLORS.rust }}>{error}</div>}
-                  <div className="text-[10px] mt-2 font-mono" style={{ color: COLORS.inkSoft }}>{t("demoPassword")}: {meta.password}</div>
-                  <button onClick={trySubmit} className="w-full mt-4 py-2.5 rounded-md text-sm font-semibold lift-hover"
+                  <button onClick={trySubmit} disabled={submitting} className="w-full mt-4 py-2.5 rounded-md text-sm font-semibold lift-hover disabled:opacity-60"
                     style={{ background: `linear-gradient(135deg, ${COLORS.rust}, ${COLORS.rustDark})`, color: COLORS.white, boxShadow: SHADOW_MD }}>
-                    {t("signIn")}
+                    {submitting ? "…" : t("signIn")}
                   </button>
                   <button onClick={backToRoles} className="w-full mt-2 py-2 text-xs font-medium" style={{ color: COLORS.inkSoft }}>
                     {t("chooseDifferentRole")}
@@ -1685,11 +1793,38 @@ function LoginScreen({ onLogin }) {
           </div>
         )}
       </div>
+      <TermsModal open={termsOpen} onClose={() => setTermsOpen(false)} />
     </div>
   );
 }
 
-function LifecycleTab({ problems: rawProblems, user, onAdvance, onPledge, onLogExpense, onGoToMatch, onOpenDetails }) {
+function TermsModal({ open, onClose }) {
+  const { t } = useLanguage();
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: "rgba(32,40,31,0.55)" }} onClick={onClose}>
+      <div className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-lg p-6" style={{ background: COLORS.card, boxShadow: SHADOW_LG }} onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display text-xl" style={{ color: COLORS.ink }}>{t("termsTitle")}</h2>
+          <button onClick={onClose} aria-label={t("termsClose")}><X size={16} style={{ color: COLORS.inkSoft }} /></button>
+        </div>
+        <div className="text-xs leading-relaxed space-y-3" style={{ color: COLORS.inkSoft }}>
+          <p><strong style={{ color: COLORS.ink }}>1. Nature of this prototype.</strong> Samadhan Setu, as presented here, is a demonstration build (SIH 2026 prototype). It is not an official Government of Jharkhand production system, and data entered here is stored only in your browser.</p>
+          <p><strong style={{ color: COLORS.ink }}>2. Accounts.</strong> Access is granted per role (Citizen, University Faculty, Industry Partner, Government Official). Credentials must not be shared outside their intended demo use.</p>
+          <p><strong style={{ color: COLORS.ink }}>3. Acceptable use.</strong> Do not submit real personal data, real grievances, or any information you would not want stored in an unsecured demo environment.</p>
+          <p><strong style={{ color: COLORS.ink }}>4. No warranty.</strong> This prototype is provided "as is" for evaluation purposes, without warranty of availability, accuracy, or fitness for production use.</p>
+          <p><strong style={{ color: COLORS.ink }}>5. Changes.</strong> These terms may be updated as the prototype evolves toward a production release.</p>
+          <p className="italic">Placeholder text for demo purposes — replace with reviewed legal terms before any real deployment.</p>
+        </div>
+        <button onClick={onClose} className="w-full mt-5 py-2 rounded-md text-sm font-semibold" style={{ background: COLORS.ink, color: COLORS.paper }}>
+          {t("termsClose")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LifecycleTab({ problems: rawProblems, user, onAdvance, onPledge, onLogExpense, onGoToMatch }) {
   const { t } = useLanguage();
   const problems = useMemo(() => scopeProblems(rawProblems, user), [rawProblems, user]);
   const userRole = user?.role;
@@ -1721,10 +1856,6 @@ function LifecycleTab({ problems: rawProblems, user, onAdvance, onPledge, onLogE
                         </span>
                       </div>
                       <div className="text-xs font-medium mt-1.5" style={{ color: COLORS.ink }}>{p.title}</div>
-                      <p className="text-[11px] mt-1 leading-snug" style={{ color: COLORS.inkSoft }}>{cardSummary(p)}</p>
-                      <button onClick={() => onOpenDetails(p.id)} className="text-[11px] mt-1 font-medium flex items-center gap-0.5" style={{ color: COLORS.rustDark }}>
-                        View details <ArrowRight size={10} />
-                      </button>
                       <div className="text-[11px] mt-1 flex items-center gap-1" style={{ color: COLORS.inkSoft }}><MapPin size={10} />{p.district}</div>
                       {p.matchedFaculty && (
                         <div className="text-[11px] mt-1 flex items-center gap-1 flex-wrap" style={{ color: COLORS.inkSoft }}>
@@ -1869,81 +2000,37 @@ function FundsPanel({ problem: p, user, onLogExpense }) {
   );
 }
 
-/* Full-detail popup for a single case — the "View details" action available wherever a
-   case is listed, giving the same depth of information as the Faculty Match detail panel. */
-function CaseDetailModal({ problem: p, onClose, onOpenMatch }) {
+function CookieBanner({ choice, onChoice }) {
   const { t } = useLanguage();
-  useEffect(() => {
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prevOverflow; };
-  }, []);
-  if (!p) return null;
-  const info = urgencyInfo(p);
-  const uColor = urgencyColor(info.pct, info.resolved);
-  const facultyGeo = p.matchedFaculty ? facultyGeoFor(p.matchedFaculty) : null;
+  if (choice) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0" onClick={onClose} style={{ background: "rgba(32,40,31,0.48)", backdropFilter: "blur(4px)" }} />
-      <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl p-5 sm:p-6" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_LG }}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <CaseStamp>{p.caseNo}</CaseStamp>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ color: COLORS.inkSoft, background: COLORS.paperDark }}>{p.status}</span>
-          </div>
-          <button onClick={onClose} aria-label={t("close")} className="p-1.5 rounded-full shrink-0" style={{ color: COLORS.inkSoft }}><X size={17} /></button>
-        </div>
+    <div className="fixed bottom-0 left-0 right-0 z-[80] p-4" style={{ background: COLORS.ink }}>
+      <div className="max-w-4xl mx-auto flex flex-wrap items-center gap-3">
+        <p className="text-xs flex-1 min-w-[220px]" style={{ color: COLORS.paper }}>{t("cookieMsg")}</p>
+        <button onClick={() => onChoice("declined")} className="text-xs font-semibold px-3 py-1.5 rounded-md shrink-0" style={{ color: COLORS.paper, border: `1px solid ${COLORS.paper}55` }}>
+          {t("cookieDecline")}
+        </button>
+        <button onClick={() => onChoice("accepted")} className="text-xs font-semibold px-3 py-1.5 rounded-md shrink-0" style={{ background: COLORS.gold, color: COLORS.ink }}>
+          {t("cookieAccept")}
+        </button>
+      </div>
+    </div>
+  );
+}
 
-        <h2 className="font-display text-xl mt-3" style={{ color: COLORS.ink }}>{p.title}</h2>
-        <p className="text-sm mt-2 leading-relaxed" style={{ color: COLORS.inkSoft }}>{p.description}</p>
-
-        <div className="flex items-center gap-2 mt-3 flex-wrap">
-          <CategoryBadge category={p.category} />
-          <span className="flex items-center gap-1 text-xs" style={{ color: COLORS.inkSoft }}><MapPin size={12} />{p.district}</span>
-          <span className="flex items-center gap-1 text-xs font-mono" style={{ color: COLORS.rustDark }}><Users size={12} />{p.votes} {t("citizensReported")}</span>
-        </div>
-        {p.reportedBy && <div className="text-xs mt-2 italic" style={{ color: COLORS.inkSoft }}>Filed by {p.reportedBy}</div>}
-        {CATEGORIES[p.category]?.sdg && <div className="text-xs mt-1" style={{ color: COLORS.inkSoft }}>{CATEGORIES[p.category].sdg}</div>}
-
-        <div className="mt-4 rounded-lg p-3" style={{ background: COLORS.paperDark, border: `1px solid ${COLORS.line}` }}>
-          <div className="text-[11px] font-mono uppercase tracking-wide mb-1.5" style={{ color: COLORS.inkSoft }}>Deadline status</div>
-          <div className="flex justify-between text-xs mb-1">
-            <span style={{ color: COLORS.inkSoft }}>{info.resolved ? t("onTarget") : info.pct >= 100 ? `Overdue ${info.overdueDays}d` : `${info.pct}% of ${info.slaDays}d target`}</span>
-          </div>
-          <ScoreBar pct={Math.min(100, info.pct)} color={uColor} />
-        </div>
-
-        {p.matchedFaculty ? (
-          <div className="mt-3 rounded-lg p-3" style={{ background: COLORS.slate + "0F", border: `1px solid ${COLORS.slate}33` }}>
-            <div className="text-[11px] font-mono uppercase tracking-wide mb-1" style={{ color: COLORS.inkSoft }}>{t("matched")}</div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <GraduationCap size={14} style={{ color: COLORS.slate }} />
-              <span className="text-sm font-medium" style={{ color: COLORS.ink }}>{p.matchedFaculty}</span>
-            </div>
-            {facultyGeo && <div className="mt-1.5"><DirectionsLink geo={facultyGeo.geo} label="Directions to campus" /></div>}
-          </div>
-        ) : (
-          <div className="mt-3 text-xs italic" style={{ color: COLORS.inkSoft }}>No faculty assigned yet.</div>
-        )}
-
-        {p.fundingGoal > 0 && (
-          <div className="mt-3 rounded-lg p-3" style={{ background: COLORS.gold + "0F", border: `1px solid ${COLORS.gold}44` }}>
-            <div className="text-[11px] font-mono uppercase tracking-wide mb-1.5" style={{ color: COLORS.inkSoft }}>Funding</div>
-            <div className="flex justify-between text-xs mb-1" style={{ color: COLORS.inkSoft }}>
-              <span>₹{(p.fundingUsed || 0).toLocaleString("en-IN")} used</span>
-              <span>of ₹{p.fundingPledged.toLocaleString("en-IN")} pledged (goal ₹{p.fundingGoal.toLocaleString("en-IN")})</span>
-            </div>
-            <ScoreBar pct={p.fundingPledged > 0 ? Math.min(100, ((p.fundingUsed || 0) / p.fundingPledged) * 100) : 0} color={COLORS.gold} />
-            {p.fundingPartner && <div className="text-[11px] mt-1.5" style={{ color: COLORS.inkSoft }}>Funded by {p.fundingPartner}</div>}
-          </div>
-        )}
-
-        {onOpenMatch && (
-          <button onClick={() => { onOpenMatch(p.id); onClose(); }} className="w-full mt-4 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5"
-            style={{ background: `linear-gradient(135deg, ${COLORS.rust}, ${COLORS.rustDark})`, color: COLORS.white, boxShadow: SHADOW_MD }}>
-            {t("findFaculty")} <ArrowRight size={14} />
-          </button>
-        )}
+function NotFoundPage({ onBack }) {
+  const { t } = useLanguage();
+  return (
+    <div className="min-h-screen w-full flex items-center justify-center p-6 text-center" style={{ background: COLORS.paper, color: COLORS.ink }}>
+      <div className="max-w-sm">
+        <div className="flex justify-center mb-4"><Emblem size={48} /></div>
+        <div className="font-display text-6xl" style={{ color: COLORS.rustDark }}>404</div>
+        <h1 className="font-display text-2xl mt-2">{t("page404Title")}</h1>
+        <p className="text-sm mt-2" style={{ color: COLORS.inkSoft }}>{t("page404Body")}</p>
+        <button onClick={onBack} className="mt-5 inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-semibold lift-hover"
+          style={{ background: `linear-gradient(135deg, ${COLORS.rust}, ${COLORS.rustDark})`, color: COLORS.white, boxShadow: SHADOW_MD }}>
+          {t("page404Back")} <ArrowRight size={13} />
+        </button>
       </div>
     </div>
   );
@@ -1952,7 +2039,7 @@ function CaseDetailModal({ problem: p, onClose, onOpenMatch }) {
 /* ---------------------------------- app ---------------------------------- */
 function AppContent() {
   const { language, setLanguage, t } = useLanguage();
-  const [problems, setProblems] = useState(SEED);
+  const [problems, setProblems] = useState(loadPersistedProblems);
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState("submit");
   const [form, setForm] = useState({ title: "", description: "", district: "Chatra", language: language, category: "" });
@@ -1962,14 +2049,102 @@ function AppContent() {
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState(null);
   const [micUnsupported, setMicUnsupported] = useState(false);
   const [highlightId, setHighlightId] = useState(null);
-  const [selectedId, setSelectedId] = useState(SEED[4].id);
-  const [detailCaseId, setDetailCaseId] = useState(null);
+  const [selectedId, setSelectedId] = useState(() => (loadPersistedProblems()[4] || loadPersistedProblems()[0])?.id ?? SEED[4].id);
   const [filter, setFilter] = useState("All");
   const [toast, setToast] = useState(null);
   const [languageOpen, setLanguageOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState(loadPersistedNotifications);
   const [notifOpen, setNotifOpen] = useState(false);
-  const nextId = useRef(4000);
+  const [footerTermsOpen, setFooterTermsOpen] = useState(false);
+  const [notFound, setNotFound] = useState(
+    () => typeof window !== "undefined" && window.location.pathname !== "/" && window.location.pathname !== ""
+  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onPop = () => setNotFound(window.location.pathname !== "/" && window.location.pathname !== "");
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Force HTTPS: this only helps once the JS has loaded (the initial request already went
+  // out), so it's defense-in-depth, not the real fix. The real fix is server/CDN-level:
+  // an HTTP→HTTPS redirect plus an HSTS header (e.g. Vercel/Netlify "Force HTTPS", or
+  // `return 301 https://$host$request_uri;` in nginx). Skipped on localhost so local dev isn't broken.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const { protocol, hostname } = window.location;
+    const isLocal = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "";
+    if (protocol === "http:" && !isLocal) {
+      window.location.replace(`https:${window.location.href.slice(protocol.length)}`);
+    }
+  }, []);
+
+  const [cookieChoice, setCookieChoice] = useState(() => {
+    try { return localStorage.getItem(COOKIE_CONSENT_KEY) || null; } catch { return null; }
+  });
+  function setConsent(choice) {
+    try { localStorage.setItem(COOKIE_CONSENT_KEY, choice); } catch {}
+    setCookieChoice(choice);
+    // A decline honors the choice for real: on decline, this session's data is kept in
+    // memory only and never written to localStorage, and any prior local data is cleared.
+    if (choice === "declined") {
+      try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(NOTIF_STORAGE_KEY); } catch {}
+    }
+  }
+
+  // Favicon (Emblem mark, as a data URI) and a meta description — set at runtime so the
+  // app is self-describing even when the surrounding index.html hasn't been touched.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='22.5' fill='${COLORS.card}' stroke='${COLORS.gold}' stroke-width='1'/><path d='M24,9 C29.5,14 30.5,22 24,28.5 C17.5,22 18.5,14 24,9 Z' fill='${COLORS.forest}'/><line x1='8' y1='36' x2='40' y2='36' stroke='${COLORS.rustDark}' stroke-width='1.4' stroke-linecap='round'/></svg>`;
+    let link = document.querySelector("link[rel='icon']");
+    if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
+    link.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+
+    let meta = document.querySelector("meta[name='description']");
+    if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.appendChild(meta); }
+    const description = "Samadhan Setu — Societal Innovation Collaboration Portal, Government of Jharkhand. Report civic problems and track them through university research and industry-backed solutions.";
+    meta.content = description;
+
+    // Social preview (Open Graph + Twitter Card). SOCIAL_IMAGE_URL is a placeholder — most
+    // platforms (Facebook, LinkedIn, Slack, X/Twitter) will not fetch an image over
+    // localhost or a relative path, so point it at the absolute URL of social-preview.png
+    // (generated alongside this file) once it's hosted on your real domain.
+    const ogTags = [
+      ["property", "og:title", "Samadhan Setu — Societal Innovation Collaboration Portal"],
+      ["property", "og:description", description],
+      ["property", "og:type", "website"],
+      ["property", "og:image", SOCIAL_IMAGE_URL],
+      ["property", "og:url", typeof window !== "undefined" ? window.location.href : ""],
+      ["name", "twitter:card", "summary_large_image"],
+      ["name", "twitter:title", "Samadhan Setu"],
+      ["name", "twitter:description", description],
+      ["name", "twitter:image", SOCIAL_IMAGE_URL],
+    ];
+    ogTags.forEach(([attr, key, content]) => {
+      let tag = document.querySelector(`meta[${attr}='${key}']`);
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, key); document.head.appendChild(tag); }
+      tag.content = content;
+    });
+  }, []);
+
+  // Page title tracks auth state and active tab, so the browser tab/history is meaningful
+  // instead of a single static string.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (notFound) { document.title = "Page not found · Samadhan Setu"; return; }
+    if (!user) { document.title = "Sign in · Samadhan Setu"; return; }
+    const tabLabels = { submit: "Report a Problem", clusters: "Case Clusters", match: "Faculty Match", dashboard: "Control Room", lifecycle: "Case Files" };
+    document.title = `${tabLabels[tab] || "Dashboard"} · Samadhan Setu`;
+  }, [tab, user, notFound]);
+
+  const nextId = useRef(null);
+  if (nextId.current === null) {
+    // Base the next case ID on whatever was actually loaded (seed or persisted), so IDs
+    // never collide with cases restored from a previous session. Computed once, not on
+    // every render.
+    nextId.current = Math.max(4000, ...problems.map((p) => p.id)) + 1;
+  }
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
   const baseDescriptionRef = useRef("");
@@ -1981,6 +2156,38 @@ function AppContent() {
   useEffect(() => {
     setForm((f) => ({ ...f, language }));
   }, [language]);
+
+  // Persist every change so a case logged as Citizen is still there after a refresh, and is
+  // visible in a second tab opened as Faculty/Industry/Government without them needing to
+  // do anything. Skipped while the person has declined local-storage consent.
+  useEffect(() => {
+    if (cookieChoice === "declined") return;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(problems)); } catch {}
+  }, [problems, cookieChoice]);
+  useEffect(() => {
+    if (cookieChoice === "declined") return;
+    try { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(notifications)); } catch {}
+  }, [notifications, cookieChoice]);
+
+  // Cross-tab sync: if another tab (e.g. one logged in as a different role) writes new
+  // data, the "storage" event fires here so this tab picks it up live, without a refresh.
+  useEffect(() => {
+    function onStorage(e) {
+      if (e.key === STORAGE_KEY) {
+        try {
+          const next = e.newValue ? JSON.parse(e.newValue) : SEED;
+          if (Array.isArray(next)) setProblems(next);
+        } catch {}
+      } else if (e.key === NOTIF_STORAGE_KEY) {
+        try {
+          const next = e.newValue ? JSON.parse(e.newValue) : [];
+          if (Array.isArray(next)) setNotifications(next);
+        } catch {}
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -2017,13 +2224,23 @@ function AppContent() {
   const allowedTabIds = user ? ROLE_META[user.role].tabs : [];
   const TABS = ALL_TABS.filter((t) => allowedTabIds.includes(t.id));
 
-  function handleLogin(role) {
-    setUser({ role, name: ROLE_META[role].demoName });
+  function handleLogin(role, credentials) {
+    setUser({ role, name: ROLE_META[role].demoName, email: credentials?.email, mobile: credentials?.mobile });
     setTab(ROLE_META[role].tabs[0]);
-    showToast(`${t("signIn")} ${ROLE_META[role].demoName} · ${ROLE_META[role].label}.`);
+    showToast(`${t("loginSuccess")} ${ROLE_META[role].demoName} · ${ROLE_META[role].label}.`);
   }
   function handleLogout() {
     setUser(null);
+  }
+  function handleResetDemoData() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(NOTIF_STORAGE_KEY);
+    } catch {}
+    setProblems(SEED);
+    setNotifications([]);
+    nextId.current = Math.max(4000, ...SEED.map((p) => p.id)) + 1;
+    showToast("Demo data reset to the original seed cases.");
   }
   function handleQuickFill(sample) {
     setForm({ ...form, title: sample.title, description: sample.description, district: sample.district });
@@ -2151,9 +2368,6 @@ function AppContent() {
     setPhotoAttached(false);
     setTab("clusters");
   }
-  function handleOpenDetails(id) {
-    setDetailCaseId(id);
-  }
   function handleOpenMatch(id) {
     if (user && !ROLE_META[user.role].tabs.includes("match")) {
       showToast("Faculty matching is visible to university faculty and government accounts.");
@@ -2205,9 +2419,11 @@ function AppContent() {
   const districtsReporting = new Set(problems.map((p) => p.district)).size;
 
   return (
-    <div className="min-h-screen w-full font-body" style={{ background: COLORS.paper, color: COLORS.ink }}>
+    <div className="min-h-screen w-full font-body" style={{ background: COLORS.paper, color: COLORS.ink, overflowX: "hidden" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+        html, body { max-width: 100%; overflow-x: hidden; }
+        * { min-width: 0; }
         .font-display { font-family: 'Roboto Slab', serif; }
         .font-body, .font-body input, .font-body select, .font-body textarea, .font-body button { font-family: 'Inter', sans-serif; }
         .font-mono { font-family: 'IBM Plex Mono', monospace; }
@@ -2220,7 +2436,12 @@ function AppContent() {
       `}</style>
       <PaperGrain />
 
-      {!user ? (
+      {notFound ? (
+        <NotFoundPage onBack={() => {
+          try { window.history.pushState({}, "", "/"); } catch {}
+          setNotFound(false);
+        }} />
+      ) : !user ? (
         <LoginScreen onLogin={handleLogin} />
       ) : (
         <>
@@ -2229,6 +2450,7 @@ function AppContent() {
               <div className="flex items-center justify-between flex-wrap gap-y-2 gap-x-4">
                 <span className="text-[11px] font-mono uppercase tracking-widest" style={{ color: COLORS.inkSoft }}>{t("department")}</span>
                 <div className="flex items-center flex-wrap gap-2">
+                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-full" style={{ background: COLORS.rust + "1A", color: COLORS.rustDark, border: `1px solid ${COLORS.rust}55` }}>SIH 2026 · Interactive Prototype</span>
                   <span className="flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full" style={{ background: COLORS.slate + "14", color: COLORS.slate, border: `1px solid ${COLORS.slate}44` }}>
                     <User size={11} /> {user.name} · {ROLE_META[user.role].label}
                   </span>
@@ -2250,7 +2472,7 @@ function AppContent() {
                         )}
                       </button>
                       {notifOpen && (
-                        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg z-50" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_LG }}>
+                        <div className="absolute right-0 mt-2 w-80 max-w-[92vw] max-h-96 overflow-y-auto rounded-lg z-50" style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, boxShadow: SHADOW_LG }}>
                           <div className="px-3 py-2 text-[11px] font-mono uppercase tracking-wide" style={{ color: COLORS.inkSoft, borderBottom: `1px solid ${COLORS.line}` }}>
                             Cases auto-routed to you
                           </div>
@@ -2280,6 +2502,14 @@ function AppContent() {
                   </button>
                   <button onClick={handleLogout} className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full" style={{ color: COLORS.inkSoft, border: `1px solid ${COLORS.line}` }}>
                     <LogOut size={11} /> {t("switchRole")}
+                  </button>
+                  <button
+                    onClick={() => { if (window.confirm("Reset all cases to the original demo seed data? This clears anything logged in this browser.")) handleResetDemoData(); }}
+                    title="Clear locally-stored demo data and restore the original seed cases"
+                    className="text-[11px] font-medium px-2.5 py-1 rounded-full"
+                    style={{ color: COLORS.inkSoft, border: `1px solid ${COLORS.line}` }}
+                  >
+                    Reset demo data
                   </button>
                 </div>
               </div>
@@ -2321,27 +2551,40 @@ function AppContent() {
                 />
               )}
               {tab === "clusters" && (
-                <ClustersTab problems={problems} user={user} highlightId={highlightId} onOpenMatch={handleOpenMatch} onOpenDetails={handleOpenDetails} filter={filter} setFilter={setFilter} />
+                <ClustersTab problems={problems} user={user} highlightId={highlightId} onOpenMatch={handleOpenMatch} filter={filter} setFilter={setFilter} />
               )}
               {tab === "match" && (
-                <MatchTab problems={problems} user={user} selectedId={selectedId} setSelectedId={setSelectedId} onAssign={handleAssign} onOpenDetails={handleOpenDetails} />
+                <MatchTab problems={problems} user={user} selectedId={selectedId} setSelectedId={setSelectedId} onAssign={handleAssign} />
               )}
-              {tab === "dashboard" && <DashboardTab problems={problems} onOpenDetails={handleOpenDetails} />}
+              {tab === "dashboard" && <DashboardTab problems={problems} />}
               {tab === "lifecycle" && (
-                <LifecycleTab problems={problems} user={user} onAdvance={handleAdvance} onPledge={handlePledge} onLogExpense={handleLogExpense} onGoToMatch={handleOpenMatch} onOpenDetails={handleOpenDetails} />
+                <LifecycleTab problems={problems} user={user} onAdvance={handleAdvance} onPledge={handlePledge} onLogExpense={handleLogExpense} onGoToMatch={handleOpenMatch} />
               )}
             </div>
           </main>
+
+          <footer className="max-w-6xl mx-auto px-4 sm:px-6 pb-10 pt-4 text-[11px] flex flex-wrap items-center gap-x-4 gap-y-1" style={{ color: COLORS.inkSoft, borderTop: `1px solid ${COLORS.line}` }}>
+            <span>{t("contactUs")}:</span>
+            <a href="mailto:support@samadhansetu.jharkhand.gov.in" className="underline underline-offset-2 hover:no-underline" style={{ color: COLORS.slate }}>
+              support@samadhansetu.jharkhand.gov.in
+            </a>
+            <a href="tel:+911800123456" className="underline underline-offset-2 hover:no-underline" style={{ color: COLORS.slate }}>
+              +91 1800-123-456
+            </a>
+            <span style={{ color: COLORS.line }}>·</span>
+            <button onClick={() => setFooterTermsOpen(true)} className="underline underline-offset-2 hover:no-underline" style={{ color: COLORS.slate }}>
+              {t("termsLinkLabel")}
+            </button>
+            <span style={{ color: COLORS.line }}>·</span>
+            <button onClick={() => setCookieChoice(null)} className="underline underline-offset-2 hover:no-underline" style={{ color: COLORS.slate }}>
+              {t("cookieSettings")}
+            </button>
+          </footer>
+          <TermsModal open={footerTermsOpen} onClose={() => setFooterTermsOpen(false)} />
         </>
       )}
 
-      {detailCaseId && (
-        <CaseDetailModal
-          problem={problems.find((p) => p.id === detailCaseId)}
-          onClose={() => setDetailCaseId(null)}
-          onOpenMatch={handleOpenMatch}
-        />
-      )}
+      <CookieBanner choice={cookieChoice} onChoice={setConsent} />
 
       {toast && (
         <div
